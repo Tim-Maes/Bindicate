@@ -6,7 +6,7 @@ namespace Bindicate.Configuration;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddBindicate(this IServiceCollection services, Assembly assembly)
+    public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
     {
         foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
         {
@@ -15,18 +15,29 @@ public static class ServiceCollectionExtensions
 
             foreach (var attr in registerAttributes)
             {
-                if (type.GetInterfaces().Contains(attr.ServiceType) || type == attr.ServiceType)
+                var serviceType = attr.ServiceType ?? type;
+
+                if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
                 {
                     switch (attr.Lifetime)
                     {
                         case Lifetime.Scoped:
-                            services.AddScoped(attr.ServiceType, type);
+                            if (serviceType == type)
+                                services.AddScoped(type);
+                            else
+                                services.AddScoped(serviceType, type);
                             break;
                         case Lifetime.Singleton:
-                            services.AddSingleton(attr.ServiceType, type);
+                            if (serviceType == type)
+                                services.AddSingleton(type);
+                            else
+                                services.AddSingleton(serviceType, type);
                             break;
                         case Lifetime.Transient:
-                            services.AddTransient(attr.ServiceType, type);
+                            if (serviceType == type)
+                                services.AddTransient(type);
+                            else
+                                services.AddTransient(serviceType, type);
                             break;
                         default:
                             throw new ArgumentException($"Unsupported lifetime: {attr.Lifetime}");
@@ -34,9 +45,11 @@ public static class ServiceCollectionExtensions
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Type {type.FullName} does not implement {attr.ServiceType.FullName}");
+                    throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
                 }
             }
+
         }
+        return services;
     }
 }
