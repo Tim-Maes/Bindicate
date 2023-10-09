@@ -31,7 +31,7 @@ services.AddAutoServiceCollection(Assembly.GetExecutingAssembly());
 Use the [RegisterService] attribute on your service classes, specifying the interface and the desired lifetime.
 
 ```
-[RegisterService(typeof(IMyService), ServiceLifetime.Transient)]
+[RegisterService(typeof(IMyService), LifeTime.Transient)]
 public class MyService : IMyService
 {
     public void DoWork()
