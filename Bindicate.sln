@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bindicate", "src\Bindicate\Bindicate.csproj", "{8DF0758C-8870-42FC-8750-077D5D65726D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bindicate.Tests", "src\Bindicate.Tests\Bindicate.Tests.csproj", "{4D3D2C54-A31A-44F5-A250-7ADE55351613}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8DF0758C-8870-42FC-8750-077D5D65726D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DF0758C-8870-42FC-8750-077D5D65726D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DF0758C-8870-42FC-8750-077D5D65726D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D3D2C54-A31A-44F5-A250-7ADE55351613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D3D2C54-A31A-44F5-A250-7ADE55351613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D3D2C54-A31A-44F5-A250-7ADE55351613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D3D2C54-A31A-44F5-A250-7ADE55351613}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
