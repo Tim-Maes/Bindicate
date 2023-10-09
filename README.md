@@ -24,14 +24,14 @@ dotnet add package Bindicate
 
 ### Add Bindicate
 Update startup or service configuration and call the `AddBindicate()` method
-```
+```csharp
 services.AddBindicate(Assembly.GetExecutingAssembly());
 ```
 ### Decorate your services:
 
 Use the [RegisterService] attribute on your service classes, specifying the interface and the desired lifetime.
 
-```
+```csharp
 [RegisterService(typeof(IMyService), LifeTime.Transient)]
 public class MyService : IMyService
 {
