@@ -4,7 +4,27 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Title>Bindicate</Title>
+    <Authors>Tim Maes</Authors>
+    <Description>Easily add services to DI container by adding a attribute</Description>
+    <PackageProjectUrl>https://www.github.com/Tim-Maes/Bindicate</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://www.github.com/Tim-Maes/Bindicate</RepositoryUrl>
+    <PackageTags>di, ioc, service, collection, extensions, attribute</PackageTags>
+    <PackageReleaseNotes>Basic implemenation for Transient, Scoped and Singleton</PackageReleaseNotes>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
