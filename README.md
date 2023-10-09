@@ -25,7 +25,7 @@ dotnet add package Bindicate
 ### Add Bindicate
 Update startup or service configuration and call the `AddBindicate()` method
 ```
-services.AddAutoServiceCollection(Assembly.GetExecutingAssembly());
+services.AddBindicate(Assembly.GetExecutingAssembly());
 ```
 ### Decorate your services:
 
