@@ -40,8 +40,6 @@ public static class ServiceCollectionExtensions
                         case Lifetime.TryAddTransient:
                             RegisterService(serviceType, type, (s, t) => services.TryAddTransient(s, t));
                             break;
-                        default:
-                            throw new ArgumentException($"Unsupported lifetime: {attr.Lifetime}");
                     }
                 }
                 else
