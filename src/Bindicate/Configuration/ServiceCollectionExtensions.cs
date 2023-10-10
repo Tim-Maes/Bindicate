@@ -10,8 +10,8 @@ public static class ServiceCollectionExtensions
     {
         foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
         {
-            var registerAttributes = type.GetCustomAttributes(typeof(RegisterServiceAttribute), false)
-                                         .Cast<RegisterServiceAttribute>();
+            var registerAttributes = type.GetCustomAttributes(typeof(BaseServiceAttribute), false)
+                                         .Cast<BaseServiceAttribute>();
 
             foreach (var attr in registerAttributes)
             {
@@ -22,22 +22,13 @@ public static class ServiceCollectionExtensions
                     switch (attr.Lifetime)
                     {
                         case Lifetime.Scoped:
-                            if (serviceType == type)
-                                services.AddScoped(type);
-                            else
-                                services.AddScoped(serviceType, type);
+                            RegisterService(services, serviceType, type, (s, t) => services.AddScoped(s, t));
                             break;
                         case Lifetime.Singleton:
-                            if (serviceType == type)
-                                services.AddSingleton(type);
-                            else
-                                services.AddSingleton(serviceType, type);
+                            RegisterService(services, serviceType, type, (s, t) => services.AddSingleton(s, t));
                             break;
                         case Lifetime.Transient:
-                            if (serviceType == type)
-                                services.AddTransient(type);
-                            else
-                                services.AddTransient(serviceType, type);
+                            RegisterService(services, serviceType, type, (s, t) => services.AddTransient(s, t));
                             break;
                         default:
                             throw new ArgumentException($"Unsupported lifetime: {attr.Lifetime}");
@@ -48,8 +39,20 @@ public static class ServiceCollectionExtensions
                     throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
                 }
             }
-
         }
+
         return services;
+    }
+
+    private static void RegisterService(IServiceCollection services, Type serviceType, Type implementationType, Action<Type, Type?> registrationMethod)
+    {
+        if (serviceType == implementationType)
+        {
+            registrationMethod(implementationType, implementationType); 
+        }
+        else
+        {
+            registrationMethod(serviceType, implementationType);
+        }
     }
 }

@@ -6,8 +6,9 @@ Easily register your services in .NET's built-in IoC container with attribute di
 
 - Automatic registration of services using custom attributes.
 - Supports Transient, Scoped, and Singleton service lifetimes.
+- No need for explicit interface specification for class-only registrations.
 - Provides clear visibility and reduces boilerplate code.
-- Simple integration with the built-in .NET IoC container.
+- Simple integration with the built-in .NET IoC container..
 
 ## Installation 📦
 
@@ -29,23 +30,35 @@ services.AddBindicate(Assembly.GetExecutingAssembly());
 ```
 ### Decorate your services:
 
-Use the [RegisterService] attribute on your service classes, specifying the interface and the desired lifetime.
+**For class-only registrations:**
 
 ```csharp
-[RegisterService(typeof(IMyService), LifeTime.Transient)]
-public class MyService : IMyService
+[AddTransient]
+public class SimpleTaskRunner
 {
-    public void DoWork()
+    public void RunTask()
+    {
+        // ...
+    }
+}
+```
+
+**When using interfaces:**
+
+```csharp
+[AddScoped(typeof(IMyTaskRunner))]
+public class TaskRunner : IMyTaskRunner
+{
+    public void Run()
     {
         // ...
     }
 }
 
-public interface IMyService
+public interface IMyTaskRunner
 {
-    void DoWork();
+    void Run();
 }
-
 ```
 
 ## License
