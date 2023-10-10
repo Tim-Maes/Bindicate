@@ -5,10 +5,23 @@ Easily register your services in .NET's built-in IoC container with attribute di
 ## Features 🌟
 
 - Automatic registration of services using custom attributes.
-- Supports Transient, Scoped, and Singleton service lifetimes.
 - No need for explicit interface specification for class-only registrations.
 - Provides clear visibility and reduces boilerplate code.
-- Simple integration with the built-in .NET IoC container..
+- Simple integration with the built-in .NET IoC container.
+
+### Supported types
+<center>
+
+| Type           | Supported|
+|----------------|----------|
+|AddTransient    |✔️        |
+|TryAddTransient |✔️        |
+|AddScoped       |✔️        |
+|TryAddScoped    |✔️        |
+|AddSingleton    |✔️        |
+|TryAddSingleton |✔️        |
+|TryAddEnumerable|❌       |
+</center>
 
 ## Installation 📦
 
@@ -24,7 +37,9 @@ dotnet add package Bindicate
 ## Usage
 
 ### Add Bindicate
-Update startup or service configuration and call the `AddBindicate()` method
+
+Register Bindicate inside your startup class, or inside your project's `ServiceCollectionExtension`
+
 ```csharp
 services.AddBindicate(Assembly.GetExecutingAssembly());
 ```
@@ -37,6 +52,15 @@ services.AddBindicate(Assembly.GetExecutingAssembly());
 public class SimpleTaskRunner
 {
     public void RunTask()
+    {
+        // ...
+    }
+}
+
+[TryAddSingleton]
+public class SimpleService
+{
+    public void DoThing()
     {
         // ...
     }

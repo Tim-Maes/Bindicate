@@ -6,14 +6,14 @@
     <Nullable>enable</Nullable>
     <Title>Bindicate</Title>
     <Authors>Tim Maes</Authors>
-    <Description>Easily add services to DI container by adding a attribute</Description>
+    <Description>Easily add services to DI container by decorating your service with an attribute</Description>
     <PackageProjectUrl>https://www.github.com/Tim-Maes/Bindicate</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://www.github.com/Tim-Maes/Bindicate</RepositoryUrl>
     <PackageTags>di, ioc, service, collection, extensions, attribute</PackageTags>
-    <PackageReleaseNotes>Basic implemenation for Transient, Scoped and Singleton</PackageReleaseNotes>
+    <PackageReleaseNotes>Add TryAddScoped, TryAddTransient and TryAddSingleton</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <Version>1.1.2</Version>
+    <Version>1.1.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
