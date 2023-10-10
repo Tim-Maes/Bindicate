@@ -61,19 +61,6 @@ public interface IMyTaskRunner
 }
 ```
 
-You can also register classes that don't have an interface.
-```csharp
-[RegisterService(LifeTime.Singleton)]
-public class MyService
-{
-    public void DoWork()
-    {
-        // ...
-    }
-}
-
-```
-
 ## License
 
 This project is licensed under the MIT license.
