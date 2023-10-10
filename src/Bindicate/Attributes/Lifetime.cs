@@ -3,6 +3,9 @@
 public enum Lifetime
 {
     Scoped,
+    TryAddScoped,
+    Transient,
+    TryAddTransient,
     Singleton,
-    Transient
+    TryAddSingleton
 }

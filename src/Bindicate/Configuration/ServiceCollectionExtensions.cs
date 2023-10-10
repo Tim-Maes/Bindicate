@@ -1,5 +1,6 @@
 ﻿using Bindicate.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 
 namespace Bindicate.Configuration;
@@ -22,13 +23,22 @@ public static class ServiceCollectionExtensions
                     switch (attr.Lifetime)
                     {
                         case Lifetime.Scoped:
-                            RegisterService(services, serviceType, type, (s, t) => services.AddScoped(s, t));
+                            RegisterService(serviceType, type, (s, t) => services.AddScoped(s, t));
+                            break;
+                        case Lifetime.TryAddScoped:
+                            RegisterService(serviceType, type, (s, t) => services.TryAddScoped(s, t));
                             break;
                         case Lifetime.Singleton:
-                            RegisterService(services, serviceType, type, (s, t) => services.AddSingleton(s, t));
+                            RegisterService(serviceType, type, (s, t) => services.AddSingleton(s, t));
+                            break;
+                        case Lifetime.TryAddSingleton:
+                            RegisterService(serviceType, type, (s, t) => services.TryAddSingleton(s, t));
                             break;
                         case Lifetime.Transient:
-                            RegisterService(services, serviceType, type, (s, t) => services.AddTransient(s, t));
+                            RegisterService(serviceType, type, (s, t) => services.AddTransient(s, t));
+                            break;
+                        case Lifetime.TryAddTransient:
+                            RegisterService(serviceType, type, (s, t) => services.TryAddTransient(s, t));
                             break;
                         default:
                             throw new ArgumentException($"Unsupported lifetime: {attr.Lifetime}");
@@ -44,15 +54,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static void RegisterService(IServiceCollection services, Type serviceType, Type implementationType, Action<Type, Type?> registrationMethod)
+    private static void RegisterService(Type serviceType, Type implementationType, Action<Type, Type?> registrationMethod)
     {
         if (serviceType == implementationType)
-        {
             registrationMethod(implementationType, implementationType); 
-        }
         else
-        {
             registrationMethod(serviceType, implementationType);
-        }
     }
 }
