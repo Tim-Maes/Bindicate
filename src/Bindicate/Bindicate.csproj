@@ -13,7 +13,7 @@
     <PackageTags>di, ioc, service, collection, extensions, attribute</PackageTags>
     <PackageReleaseNotes>Add TryAddScoped, TryAddTransient and TryAddSingleton</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <Version>1.1.5</Version>
+    <Version>1.1.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
