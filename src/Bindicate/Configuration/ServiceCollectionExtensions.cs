@@ -7,6 +7,13 @@ namespace Bindicate.Configuration;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers services decorated with <see cref="BaseServiceAttribute"/> derivatives in the specified assembly.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
+    /// <param name="assembly">The assembly to scan for types decorated with service registration attributes.</param>
+    /// <returns>The same service collection so that multiple calls can be chained.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when a type does not implement the specified service interface.</exception>
     public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
     {
         foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
@@ -55,7 +62,7 @@ public static class ServiceCollectionExtensions
     private static void RegisterService(Type serviceType, Type implementationType, Action<Type, Type?> registrationMethod)
     {
         if (serviceType == implementationType)
-            registrationMethod(implementationType, implementationType); 
+            registrationMethod(implementationType, implementationType);
         else
             registrationMethod(serviceType, implementationType);
     }
