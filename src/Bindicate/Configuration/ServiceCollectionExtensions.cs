@@ -16,53 +16,47 @@ public static class ServiceCollectionExtensions
     /// <exception cref="InvalidOperationException">Thrown when a type does not implement the specified service interface.</exception>
     public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
     {
-        var types = assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract);
-
-        foreach (var type in types)
+        foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
         {
             var registerAttributes = type.GetCustomAttributes(typeof(BaseServiceAttribute), false)
                                          .Cast<BaseServiceAttribute>();
 
             foreach (var attr in registerAttributes)
             {
-                RegisterServiceBasedOnLifetime(services, type, attr);
+                var serviceType = attr.ServiceType ?? type;
+                var registrationMethod = GetRegistrationMethod(services, attr.Lifetime);
+
+                if (serviceType.IsDefined(typeof(AddGenericInterfaceAttribute), false))
+                {
+                    RegisterService(serviceType, type, registrationMethod);
+                }
+                else if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
+                {
+                    RegisterService(serviceType, type, registrationMethod);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
+                }
             }
         }
 
         return services;
     }
 
-    private static void RegisterServiceBasedOnLifetime(IServiceCollection services, Type type, BaseServiceAttribute attr)
+    private static Action<Type, Type> GetRegistrationMethod(IServiceCollection services, Lifetime lifetime)
+    => lifetime switch
     {
-        var serviceType = attr.ServiceType ?? type;
+        Lifetime.Scoped => (s, t) => services.AddScoped(s, t),
+        Lifetime.Singleton => (s, t) => services.AddSingleton(s, t),
+        Lifetime.Transient => (s, t) => services.AddTransient(s, t),
+        Lifetime.TryAddScoped => (s, t) => services.TryAddScoped(s, t),
+        Lifetime.TryAddSingleton => (s, t) => services.TryAddSingleton(s, t),
+        Lifetime.TryAddTransient => (s, t) => services.TryAddTransient(s, t),
+    };
 
-        if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
-        {
-            switch (attr.Lifetime)
-            {
-                case Lifetime.Scoped:
-                    services.AddScoped(serviceType, type);
-                    break;
-                case Lifetime.TryAddScoped:
-                    services.TryAddScoped(serviceType, type);
-                    break;
-                case Lifetime.Singleton:
-                    services.AddSingleton(serviceType, type);
-                    break;
-                case Lifetime.TryAddSingleton:
-                    services.TryAddSingleton(serviceType, type);
-                    break;
-                case Lifetime.Transient:
-                    services.AddTransient(serviceType, type);
-                    break;
-                case Lifetime.TryAddTransient:
-                    services.TryAddTransient(serviceType, type);
-                    break;
-            }
-        }
-        else
-        {
-            throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
-        }
+    private static void RegisterService(Type serviceType, Type implementationType, Action<Type, Type> registrationMethod)
+    {
+        registrationMethod(serviceType, implementationType);
     }
 }
