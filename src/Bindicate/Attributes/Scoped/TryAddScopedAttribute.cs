@@ -1,4 +1,6 @@
-﻿namespace Bindicate.Attributes;
+﻿using Bindicate.LifeTime;
+
+namespace Bindicate.Attributes;
 
 /// <summary>
 /// Specifies that a service should be registered with the dependency injection container for the lifetime of a scope.

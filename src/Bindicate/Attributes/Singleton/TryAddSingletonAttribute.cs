@@ -1,4 +1,6 @@
-﻿namespace Bindicate.Attributes;
+﻿using Bindicate.LifeTime;
+
+namespace Bindicate.Attributes;
 
 /// <summary>
 /// Attempts to register a service with the dependency injection container with a singleton lifetime.
