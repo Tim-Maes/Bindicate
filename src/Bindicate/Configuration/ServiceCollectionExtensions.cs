@@ -1,5 +1,5 @@
 ﻿using Bindicate.Attributes;
-using Bindicate.LifeTime;
+using Bindicate.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
@@ -57,15 +57,15 @@ namespace Bindicate.Configuration
             return services;
         }
 
-        private static Action<Type, Type> GetRegistrationMethod(IServiceCollection services, Lifetime lifetime)
+        private static Action<Type, Type> GetRegistrationMethod(IServiceCollection services, Lifetime.Lifetime lifetime)
             => lifetime switch
             {
-                Lifetime.Scoped => (s, t) => services.AddScoped(s, t),
-                Lifetime.Singleton => (s, t) => services.AddSingleton(s, t),
-                Lifetime.Transient => (s, t) => services.AddTransient(s, t),
-                Lifetime.TryAddScoped => (s, t) => services.TryAddScoped(s, t),
-                Lifetime.TryAddSingleton => (s, t) => services.TryAddSingleton(s, t),
-                Lifetime.TryAddTransient => (s, t) => services.TryAddTransient(s, t),
+                Lifetime.Lifetime.Scoped => (s, t) => services.AddScoped(s, t),
+                Lifetime.Lifetime.Singleton => (s, t) => services.AddSingleton(s, t),
+                Lifetime.Lifetime.Transient => (s, t) => services.AddTransient(s, t),
+                Lifetime.Lifetime.TryAddScoped => (s, t) => services.TryAddScoped(s, t),
+                Lifetime.Lifetime.TryAddSingleton => (s, t) => services.TryAddSingleton(s, t),
+                Lifetime.Lifetime.TryAddTransient => (s, t) => services.TryAddTransient(s, t),
                 _ => throw new ArgumentOutOfRangeException(nameof(lifetime), "Unsupported lifetime.")
             };
 

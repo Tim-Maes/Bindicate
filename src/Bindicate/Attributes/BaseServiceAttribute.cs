@@ -1,4 +1,4 @@
-﻿using Bindicate.LifeTime;
+﻿using Bindicate.Lifetime;
 
 namespace Bindicate.Attributes;
 
@@ -7,7 +7,7 @@ public abstract class BaseServiceAttribute : Attribute
 {
     public Type ServiceType { get; protected set; }
 
-    public abstract Lifetime Lifetime { get; }
+    public abstract Lifetime.Lifetime Lifetime { get; }
 
     // Constructor for class-only registration
     protected BaseServiceAttribute()

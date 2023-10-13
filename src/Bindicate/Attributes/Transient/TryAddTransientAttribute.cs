@@ -1,4 +1,4 @@
-﻿using Bindicate.LifeTime;
+﻿using Bindicate.Lifetime;
 
 namespace Bindicate.Attributes;
 
@@ -8,7 +8,7 @@ namespace Bindicate.Attributes;
 /// </summary>
 public class TryAddTransientAttribute : BaseServiceAttribute
 {
-    public override Lifetime Lifetime => Lifetime.TryAddTransient;
+    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.TryAddTransient;
 
     public TryAddTransientAttribute() : base() { }
 

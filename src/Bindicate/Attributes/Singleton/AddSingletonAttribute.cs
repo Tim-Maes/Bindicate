@@ -1,4 +1,4 @@
-﻿using Bindicate.LifeTime;
+﻿using Bindicate.Lifetime;
 
 namespace Bindicate.Attributes;
 
@@ -8,7 +8,7 @@ namespace Bindicate.Attributes;
 /// </summary>
 public class AddSingletonAttribute : BaseServiceAttribute
 {
-    public override Lifetime Lifetime => Lifetime.Singleton;
+    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.Singleton;
 
     public AddSingletonAttribute() : base() { }
 

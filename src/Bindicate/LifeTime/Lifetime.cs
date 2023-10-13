@@ -1,4 +1,4 @@
-﻿namespace Bindicate.LifeTime;
+﻿namespace Bindicate.Lifetime;
 
 public enum Lifetime
 {
