@@ -49,7 +49,6 @@ Add the following code snippet in your project's `Startup` class or within a `Se
 ```csharp
 services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
 ```
-This will scan all types in the current executing assembly and register them according to their respective attributes.
 
 **Register Services Across Multiple Assemblies**
 
@@ -59,9 +58,9 @@ If you want to scan and register services across all loaded assemblies, you can 
 services.AddAutowiring();
 ```
 
-### Decorate your services:
+## Decorate your services:
 
-## Basic usage
+### Basic usage
 
 **For class-only registrations:**
 
@@ -107,7 +106,7 @@ public interface IMyTaskRunner
 }
 ```
 
-## Generics
+### Generics
 
 **Define a generic interface:**
 
