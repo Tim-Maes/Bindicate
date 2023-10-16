@@ -2,10 +2,8 @@
 using Bindicate.Configuration;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Reflection;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Bindicate.Tests.ScopedTests;
 
@@ -17,7 +15,7 @@ public class AddScopedAttributeTests
     public void AddScoped_WithInterface_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())
@@ -32,7 +30,7 @@ public class AddScopedAttributeTests
     public void AddScoped_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())
