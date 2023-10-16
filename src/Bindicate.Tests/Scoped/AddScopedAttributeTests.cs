@@ -17,7 +17,7 @@ public class AddScopedAttributeTests
     public void AddScoped_WithInterface_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())
@@ -32,7 +32,7 @@ public class AddScopedAttributeTests
     public void AddScoped_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())

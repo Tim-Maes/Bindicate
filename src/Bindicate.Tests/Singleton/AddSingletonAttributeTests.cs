@@ -16,7 +16,7 @@ public class AddSingletonAttributeTests
     public void AddSingleton_AlwaysReturnsSame()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         var instance1 = serviceProvider.GetService<ISingletonInterface>();
@@ -29,7 +29,7 @@ public class AddSingletonAttributeTests
     public void AddSingleton_WithInterface_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())
@@ -44,7 +44,7 @@ public class AddSingletonAttributeTests
     public void AddSingleton_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())

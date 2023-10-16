@@ -17,7 +17,7 @@ public class AddTransientAttributeTests
     public void AddTransient_AlwaysReturnsNewInstance()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         var instance1 = serviceProvider.GetService<ITransientInterface>();
@@ -30,7 +30,7 @@ public class AddTransientAttributeTests
     public void AddTransient_WithInterface_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())
@@ -45,7 +45,7 @@ public class AddTransientAttributeTests
     public void AddSingleton_RegistersCorrectly()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         using (var scope = serviceProvider.CreateScope())

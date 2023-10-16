@@ -40,13 +40,25 @@ dotnet add package Bindicate
 ```
 ## Usage
 
-### Add Bindicate
+### Autowire dependencies
 
-Register Bindicate inside your startup class, or inside your project's `ServiceCollectionExtension`
+**Register Services in a Single Assembly**
+
+Add the following code snippet in your project's `Startup` class or within a `ServiceCollectionExtensions` class:`
 
 ```csharp
-services.AddBindicate(Assembly.GetExecutingAssembly());
+services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
 ```
+This will scan all types in the current executing assembly and register them according to their respective attributes.
+
+**Register Services Across Multiple Assemblies**
+
+If you want to scan and register services across all loaded assemblies, you can do so by adding the following line in your hosting project:
+
+```csharp
+services.AddAutowiring();
+```
+
 ### Decorate your services:
 
 ## Basic usage
@@ -99,7 +111,7 @@ public interface IMyTaskRunner
 
 **Define a generic interface:**
 
-Decorate the generic interface with the [RegisterGenericInterface] attribute.
+Decorate the generic interface with the `[RegisterGenericInterface]` attribute.
 
 ```csharp
 [RegisterGenericInterface]

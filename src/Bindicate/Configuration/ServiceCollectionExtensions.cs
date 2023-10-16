@@ -8,7 +8,32 @@ namespace Bindicate.Configuration
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
+        /// <summary>
+        /// Registers services using autowiring for all loaded assemblies.
+        /// This will scan through all types in each loaded assembly and
+        /// register them according to their attributes.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
+        /// <returns>The same service collection so that multiple calls can be chained.</returns>
+        public static IServiceCollection AddAutowiring(this IServiceCollection services)
+        {
+            // Iterate over all loaded assemblies and call AddAutowiringForAssembly for each one
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                services.AddAutowiringForAssembly(assembly);
+            }
+            return services;
+        }
+
+        /// <summary>
+        /// Registers services using autowiring for a specific assembly.
+        /// This will scan through all types in the given assembly and
+        /// register them according to their attributes.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
+        /// <param name="assembly">The assembly to scan for types.</param>
+        /// <returns>The same service collection so that multiple calls can be chained.</returns>
+        public static IServiceCollection AddAutowiringForAssembly(this IServiceCollection services, Assembly assembly)
         {
             foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
             {
