@@ -99,6 +99,8 @@ public interface IMyTaskRunner
 
 **Define a generic interface:**
 
+Decorate the generic interface with the [RegisterGenericInterface] attribute.
+
 ```csharp
 [RegisterGenericInterface]
 public interface IRepository<T> where T : BaseEntity
@@ -107,8 +109,7 @@ public interface IRepository<T> where T : BaseEntity
 }
 ```
 
-**Create implementation:**
-Create a class that implements this interface. In the example, we use `[AddTransient]` to indicate that we want transient lifetime for instances of this generic type. Note the use of typeof(IRepository<>) as the argument to the attribute, which means this implementation corresponds to any type parameter that satisfies the constraints.
+**Create the implementation:**
 ```csharp
 [AddTransient(typeof(IRepository<>))]
 public class Repository<T> : IRepository<T> where T : BaseEntity
