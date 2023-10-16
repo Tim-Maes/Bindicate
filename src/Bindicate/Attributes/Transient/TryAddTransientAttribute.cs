@@ -1,4 +1,6 @@
-﻿namespace Bindicate.Attributes;
+﻿using Bindicate.Lifetime;
+
+namespace Bindicate.Attributes;
 
 /// <summary>
 /// Attempts to register a service with the dependency injection container with a transient lifetime.
@@ -6,7 +8,7 @@
 /// </summary>
 public class TryAddTransientAttribute : BaseServiceAttribute
 {
-    public override Lifetime Lifetime => Lifetime.TryAddTransient;
+    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.TryAddTransient;
 
     public TryAddTransientAttribute() : base() { }
 

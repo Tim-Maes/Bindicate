@@ -1,4 +1,6 @@
-﻿namespace Bindicate.Attributes;
+﻿using Bindicate.Lifetime;
+
+namespace Bindicate.Attributes;
 
 /// <summary>
 /// Specifies that a service should be registered with the dependency injection container for the lifetime of a scope.
@@ -7,7 +9,7 @@
 /// </summary>
 public class TryAddScopedAttribute : BaseServiceAttribute
 {
-    public override Lifetime Lifetime => Lifetime.TryAddScoped;
+    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.TryAddScoped;
 
     public TryAddScopedAttribute() : base() { }
 

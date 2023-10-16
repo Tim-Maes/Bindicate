@@ -49,7 +49,11 @@ services.AddBindicate(Assembly.GetExecutingAssembly());
 ```
 ### Decorate your services:
 
+## Basic usage
+
 **For class-only registrations:**
+
+Simple decorate your class with the attribute to register. You can use an attribute for a specific lifetime.
 
 ```csharp
 [AddTransient]
@@ -73,6 +77,8 @@ public class SimpleService
 
 **When using interfaces:**
 
+Decorate your class with the attribute and provide the interface
+
 ```csharp
 [AddScoped(typeof(IMyTaskRunner))]
 public class TaskRunner : IMyTaskRunner
@@ -88,6 +94,45 @@ public interface IMyTaskRunner
     void Run();
 }
 ```
+
+## Generics
+
+**Define a generic interface:**
+
+```csharp
+[RegisterGenericInterface]
+public interface IRepository<T> where T : BaseEntity
+{
+    void add(T entity);
+}
+```
+
+**Create implementation:**
+Create a class that implements this interface. In the example, we use `[AddTransient]` to indicate that we want transient lifetime for instances of this generic type. Note the use of typeof(IRepository<>) as the argument to the attribute, which means this implementation corresponds to any type parameter that satisfies the constraints.
+```csharp
+[AddTransient(typeof(IRepository<>))]
+public class Repository<T> : IRepository<T> where T : BaseEntity
+{
+    public Repository()
+    {
+    }
+
+    public void add(T entity)
+    {
+        // Implementation here
+    }
+}
+```
+
+**How to use** 
+
+You can now resolve instances of this type from `IServiceProvider`
+```csharp
+var customerRepo = serviceProvider.GetService<IRepository<Customer>>();
+var productRepo = serviceProvider.GetService<IRepository<Product>>();
+```
+
+Both customerRepo and productRepo will be instances of Repository<T> but will operate on Customer and Product types, respectively.
 
 ## License
 

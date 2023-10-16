@@ -1,68 +1,77 @@
 ﻿using Bindicate.Attributes;
+using Bindicate.Lifetime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 
-namespace Bindicate.Configuration;
-
-public static class ServiceCollectionExtensions
+namespace Bindicate.Configuration
 {
-    /// <summary>
-    /// Registers services decorated with <see cref="BaseServiceAttribute"/> derivatives in the specified assembly.
-    /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
-    /// <param name="assembly">The assembly to scan for types decorated with service registration attributes.</param>
-    /// <returns>The same service collection so that multiple calls can be chained.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when a type does not implement the specified service interface.</exception>
-    public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
+    public static class ServiceCollectionExtensions
     {
-        var types = assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract);
-
-        foreach (var type in types)
+        public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
         {
-            var registerAttributes = type.GetCustomAttributes(typeof(BaseServiceAttribute), false)
-                                         .Cast<BaseServiceAttribute>();
-
-            foreach (var attr in registerAttributes)
+            foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
             {
-                RegisterServiceBasedOnLifetime(services, type, attr);
+                var registerAttributes = type.GetCustomAttributes(typeof(BaseServiceAttribute), false)
+                                             .Cast<BaseServiceAttribute>();
+
+                foreach (var attr in registerAttributes)
+                {
+                    var serviceType = attr.ServiceType ?? type;
+                    var registrationMethod = GetRegistrationMethod(services, attr.Lifetime);
+
+                    if (serviceType.IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
+                    {
+                        if (serviceType.IsGenericType)
+                        {
+                            services.Add(ServiceDescriptor.Describe(
+                                serviceType.GetGenericTypeDefinition(),
+                                type.GetGenericTypeDefinition(),
+                                attr.Lifetime.ConvertToServiceLifetime())
+                            );
+                        }
+                        else
+                        {
+                            // Handle non-generic services with generic interfaces
+                            foreach (var iface in type.GetInterfaces())
+                            {
+                                if (iface.IsGenericType && iface.GetGenericTypeDefinition().IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
+                                {
+                                    var genericInterface = iface.GetGenericTypeDefinition();
+                                    services.Add(ServiceDescriptor.Describe(genericInterface, type, attr.Lifetime.ConvertToServiceLifetime()));
+                                }
+                            }
+                        }
+                    }
+                    else if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
+                    {
+                        RegisterService(serviceType, type, registrationMethod);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
+                    }
+                }
             }
+
+            return services;
         }
 
-        return services;
-    }
-
-    private static void RegisterServiceBasedOnLifetime(IServiceCollection services, Type type, BaseServiceAttribute attr)
-    {
-        var serviceType = attr.ServiceType ?? type;
-
-        if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
-        {
-            switch (attr.Lifetime)
+        private static Action<Type, Type> GetRegistrationMethod(IServiceCollection services, Lifetime.Lifetime lifetime)
+            => lifetime switch
             {
-                case Lifetime.Scoped:
-                    services.AddScoped(serviceType, type);
-                    break;
-                case Lifetime.TryAddScoped:
-                    services.TryAddScoped(serviceType, type);
-                    break;
-                case Lifetime.Singleton:
-                    services.AddSingleton(serviceType, type);
-                    break;
-                case Lifetime.TryAddSingleton:
-                    services.TryAddSingleton(serviceType, type);
-                    break;
-                case Lifetime.Transient:
-                    services.AddTransient(serviceType, type);
-                    break;
-                case Lifetime.TryAddTransient:
-                    services.TryAddTransient(serviceType, type);
-                    break;
-            }
-        }
-        else
+                Lifetime.Lifetime.Scoped => (s, t) => services.AddScoped(s, t),
+                Lifetime.Lifetime.Singleton => (s, t) => services.AddSingleton(s, t),
+                Lifetime.Lifetime.Transient => (s, t) => services.AddTransient(s, t),
+                Lifetime.Lifetime.TryAddScoped => (s, t) => services.TryAddScoped(s, t),
+                Lifetime.Lifetime.TryAddSingleton => (s, t) => services.TryAddSingleton(s, t),
+                Lifetime.Lifetime.TryAddTransient => (s, t) => services.TryAddTransient(s, t),
+                _ => throw new ArgumentOutOfRangeException(nameof(lifetime), "Unsupported lifetime.")
+            };
+
+        private static void RegisterService(Type serviceType, Type implementationType, Action<Type, Type> registrationMethod)
         {
-            throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
+            registrationMethod(serviceType, implementationType);
         }
     }
 }
