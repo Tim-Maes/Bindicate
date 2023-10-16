@@ -2,10 +2,8 @@
 using Bindicate.Configuration;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Reflection;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Bindicate.Tests.ScopedTests;
 
