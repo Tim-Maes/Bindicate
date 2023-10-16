@@ -5,7 +5,6 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Bindicate.Tests.Transient;
 
