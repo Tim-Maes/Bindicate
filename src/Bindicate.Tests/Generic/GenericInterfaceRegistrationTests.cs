@@ -8,6 +8,29 @@ namespace Bindicate.Tests.Generic;
 public class GenericRepositoryRegistrationTests
 {
     [Fact]
+    public void ShouldRegisterGenericRepository_ForCustomerAndProduct_AsTransient()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var assembly = typeof(TransientRepository<>).Assembly;
+
+        // Act
+        services.AddBindicate(assembly);
+        var serviceProvider = services.BuildServiceProvider();
+
+        // Assert
+        var instanceForCustomer = serviceProvider.GetService<ITransientRepository<Customer>>();
+        var instanceForProduct = serviceProvider.GetService<ITransientRepository<Product>>();
+
+        // All instances should exist
+        instanceForCustomer.Should().NotBeNull();
+        instanceForCustomer.Should().BeAssignableTo<ITransientRepository<Customer>>();
+
+        instanceForProduct.Should().NotBeNull();
+        instanceForProduct.Should().BeAssignableTo<ITransientRepository<Product>>();
+    }
+
+    [Fact]
     public void ShouldRegisterGenericRepository_ForCustomer_AsScoped()
     {
         // Arrange
