@@ -8,6 +8,11 @@ namespace Bindicate.Configuration
 {
     public static class ServiceCollectionExtensions
     {
+        public static BindicateConfigurationBuilder AddBindicate(this IServiceCollection services)
+        {
+            return new BindicateConfigurationBuilder(services);
+        }
+
         public static IServiceCollection AddBindicate(this IServiceCollection services, Assembly assembly)
         {
             foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
