@@ -42,17 +42,19 @@ dotnet add package Bindicate
 
 ### Autowire dependencies
 
-**Register Services in a Single Assembly**
+**Register Services per Assembly**
 
-Add the following code snippet in your project's `Startup` class or within a `ServiceCollectionExtensions` class:`
+Add this line in a project to register all decorated services. You can repeat this line and pass any assembly.
 
 ```csharp
 services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
+services.AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface)));
 ```
 
 **Register Services Across Multiple Assemblies**
 
 If you want to scan and register services across all loaded assemblies, you can do so by adding the following line in your hosting project:
+*Note that this might not work if not all assemblies are loaded at this point in startup configuration*!
 
 ```csharp
 services.AddAutowiring();
