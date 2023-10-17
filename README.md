@@ -54,9 +54,14 @@ services.AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface)));
 **Register Services Across Multiple Assemblies**
 
 If you want to scan and register services across all loaded assemblies, you can do so by adding the following line in your hosting project:
-*Note that this might not work if not all assemblies are loaded at this point in startup configuration*!
+
+***Note** that this might not work if not all assemblies are loaded at this point in startup configuration*!
 
 ```csharp
+// Trigger loading assemblies to be able to use AddAutowiring:
+var triggerAssembly1 = typeof(ProjectName.SomeType);
+var triggerAssembly2 = typeof(OtherProjectName.SomeOtherType);
+
 services.AddAutowiring();
 ```
 
