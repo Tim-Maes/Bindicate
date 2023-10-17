@@ -47,8 +47,9 @@ dotnet add package Bindicate
 Add this line in a project to register all decorated services. You can repeat this line and pass any assembly.
 
 ```csharp
-services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
-services.AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface)));
+services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly()); // Register all types in current project
+
+services.AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface))); // Register types from referenced project
 ```
 
 **Register Services Across Multiple Assemblies**
@@ -58,11 +59,13 @@ If you want to scan and register services across all loaded assemblies, you can 
 ***Note** that this might not work if not all assemblies are loaded at this point in startup configuration*!
 
 ```csharp
-// Trigger loading assemblies to be able to use AddAutowiring:
+// Trigger loading of unloaded assemblies to be able to use AddAutowiring:
 var triggerAssembly1 = typeof(ProjectName.SomeType);
 var triggerAssembly2 = typeof(OtherProjectName.SomeOtherType);
 
 services.AddAutowiring();
+
+//Or just use AddAutowiringForAssembly method
 ```
 
 ## Decorate your services:
