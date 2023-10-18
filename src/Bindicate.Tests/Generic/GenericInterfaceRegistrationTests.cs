@@ -1,7 +1,5 @@
 ﻿using Bindicate.Configuration;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Bindicate.Tests.Generic;
 

@@ -1,11 +1,7 @@
 ﻿using Bindicate.Attributes;
 using Bindicate.Configuration;
 using Bindicate.Tests.ScopedTests;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Xunit;
-
 namespace Bindicate.Tests.Transient;
 
 public class AddTransientAttributeTests
