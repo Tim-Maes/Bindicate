@@ -3,7 +3,9 @@
 ```
 'A blend of "Bind" and "Indicate"'.
 ```
-
+|Nuget|
+-------
+|![NuGet](https://img.shields.io/nuget/v/Bindicate.svg)|
 Easily register your services in .NET's built-in IoC container with attribute directives.
 
 ## Features 🌟
