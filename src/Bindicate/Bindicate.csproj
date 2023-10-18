@@ -13,7 +13,11 @@
     <PackageTags>di, ioc, service, collection, extensions, attribute</PackageTags>
     <PackageReleaseNotes>GenericInterface support</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+<<<<<<< Updated upstream
     <Version>1.1.7</Version>
+=======
+    <Version>1.1.9</Version>
+>>>>>>> Stashed changes
   </PropertyGroup>
 
   <ItemGroup>
