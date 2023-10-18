@@ -5,7 +5,6 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Bindicate.Tests.Transient;
 
@@ -17,7 +16,7 @@ public class AddTransientAttributeTests
     public void AddTransient_AlwaysReturnsNewInstance()
     {
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
         var instance1 = serviceProvider.GetService<ITransientInterface>();
@@ -29,31 +28,37 @@ public class AddTransientAttributeTests
     [Fact]
     public void AddTransient_WithInterface_RegistersCorrectly()
     {
+        // Arrange
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
+        
+        // Act
+        using var scope = serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetService<ITransientInterface>();
+        ServiceDescriptor serviceDescriptor = services.First(x => x.ServiceType == typeof(ITransientInterface));
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var service = scope.ServiceProvider.GetService<ITransientInterface>();
-
-            service.Should().NotBeNull().And.BeOfType<TransientWithInterface>();
-        }
+        // Assert
+        service.Should().NotBeNull().And.BeOfType<TransientWithInterface>();
+        serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Transient);
     }
 
     [Fact]
     public void AddSingleton_RegistersCorrectly()
     {
+        // Arrange
         var services = new ServiceCollection();
-        services.AddBindicate(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var service = scope.ServiceProvider.GetService<SimpleTransientClass>();
+        // Act
+        using var scope = serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetService<SimpleTransientClass>();
+        ServiceDescriptor serviceDescriptor = services.First(x => x.ServiceType == typeof(SimpleTransientClass));
 
-            service.Should().NotBeNull().And.BeOfType<SimpleTransientClass>();
-        }
+        // Assert
+        service.Should().NotBeNull().And.BeOfType<SimpleTransientClass>();
+        serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Transient);
     }
 }
 

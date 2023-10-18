@@ -15,7 +15,7 @@ public class GenericRepositoryRegistrationTests
         var assembly = typeof(TransientRepository<>).Assembly;
 
         // Act
-        services.AddBindicate(assembly);
+        services.AddAutowiringForAssembly(assembly);
         var serviceProvider = services.BuildServiceProvider();
 
         // Assert
@@ -38,7 +38,7 @@ public class GenericRepositoryRegistrationTests
         var assembly = typeof(Repository<>).Assembly;
 
         // Act
-        services.AddBindicate(assembly);
+        services.AddAutowiringForAssembly(assembly);
         var serviceProvider = services.BuildServiceProvider();
 
         IRepository<Customer> instance1, instance2, instance3;
@@ -73,7 +73,7 @@ public class GenericRepositoryRegistrationTests
         var assembly = typeof(TransientRepository<>).Assembly;
 
         // Act
-        services.AddBindicate(assembly);
+        services.AddAutowiringForAssembly(assembly);
         var serviceProvider = services.BuildServiceProvider();
 
         // Assert

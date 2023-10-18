@@ -6,18 +6,14 @@
     <Nullable>enable</Nullable>
     <Title>Bindicate</Title>
     <Authors>Tim Maes</Authors>
-    <Description>Easily add services to DI container by decorating your service with an attribute</Description>
+    <Description>Autowiring library. Easily add services to DI container by decorating your service with an attribute</Description>
     <PackageProjectUrl>https://www.github.com/Tim-Maes/Bindicate</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://www.github.com/Tim-Maes/Bindicate</RepositoryUrl>
     <PackageTags>di, ioc, service, collection, extensions, attribute</PackageTags>
-    <PackageReleaseNotes>GenericInterface support</PackageReleaseNotes>
+    <PackageReleaseNotes>Can scan all assemblies</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-<<<<<<< Updated upstream
-    <Version>1.1.7</Version>
-=======
-    <Version>1.1.9</Version>
->>>>>>> Stashed changes
+    <Version>1.1.8</Version>
   </PropertyGroup>
 
   <ItemGroup>

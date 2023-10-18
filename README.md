@@ -3,8 +3,7 @@
 ```
 'A blend of "Bind" and "Indicate"'.
 ```
-
-Easily register your services in .NET's built-in IoC container with attribute directives.
+![NuGet](https://img.shields.io/nuget/v/Bindicate.svg) ![NuGet](https://img.shields.io/nuget/dt/Bindicate.svg)
 
 ## Features 🌟
 
@@ -40,16 +39,39 @@ dotnet add package Bindicate
 ```
 ## Usage
 
-### Add Bindicate
+### Autowire dependencies
 
-Register Bindicate inside your startup class, or inside your project's `ServiceCollectionExtension`
+**Register Services per Assembly**
+
+Add this line in a project to register all decorated services. You can repeat this line and pass any assembly.
 
 ```csharp
-services.AddBindicate(Assembly.GetExecutingAssembly());
-```
-### Decorate your services:
+// Register all types in current project
+services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
 
-## Basic usage
+// Register types from referenced project
+services.AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface))); 
+```
+
+**Register Services Across Multiple Assemblies**
+
+If you want to scan and register services across all loaded assemblies, you can do so by adding the following line in your hosting project:
+
+***Note** that this might not work if not all assemblies are loaded at this point in startup configuration*!
+
+```csharp
+// Trigger loading of unloaded assemblies to be able to use AddAutowiring:
+var triggerAssembly1 = typeof(ProjectName.SomeType);
+var triggerAssembly2 = typeof(OtherProjectName.SomeOtherType);
+
+services.AddAutowiring();
+
+//Or just use AddAutowiringForAssembly method
+```
+
+## Decorate your services:
+
+### Basic usage
 
 **For class-only registrations:**
 
@@ -95,11 +117,11 @@ public interface IMyTaskRunner
 }
 ```
 
-## Generics
+### Generics
 
 **Define a generic interface:**
 
-Decorate the generic interface with the [RegisterGenericInterface] attribute.
+Decorate the generic interface with the `[RegisterGenericInterface]` attribute.
 
 ```csharp
 [RegisterGenericInterface]
