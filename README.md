@@ -46,7 +46,7 @@ dotnet add package Bindicate
 
 Add this line in a project to register all decorated services. You can repeat this line and pass any assembly.
 
-```
+```csharp
 // Register all types in current project
 services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
 
