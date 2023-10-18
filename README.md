@@ -3,7 +3,8 @@
 ```
 'A blend of "Bind" and "Indicate"'.
 ```
-![NuGet](https://img.shields.io/nuget/v/Bindicate.svg)
+![NuGet](https://img.shields.io/nuget/v/Bindicate.svg) ![NuGet](https://img.shields.io/nuget/dt/Bindicate.svg) ![Build Status](https://github.com/Tim-Maes/Bindicate/.github/workflows/publish.yml/badge.svg)
+
 
 ## Features 🌟
 
