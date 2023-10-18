@@ -1,10 +1,7 @@
 ﻿using Bindicate.Attributes;
 using Bindicate.Configuration;
 using Bindicate.Tests.ScopedTests;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Xunit;
 
 namespace Bindicate.Tests.Singleton;
 
@@ -28,31 +25,37 @@ public class AddSingletonAttributeTests
     [Fact]
     public void AddSingleton_WithInterface_RegistersCorrectly()
     {
+        // Arrange
         var services = new ServiceCollection();
         services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var service = scope.ServiceProvider.GetService<ISingletonInterface>();
+        // Act
+        using var scope = serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetService<ISingletonInterface>();
+        ServiceDescriptor serviceDescriptor = services.First(x => x.ServiceType == typeof(ISingletonInterface));
 
-            service.Should().NotBeNull().And.BeOfType<SingletonWithInterface>();
-        }
+        // Assert
+        service.Should().NotBeNull().And.BeOfType<SingletonWithInterface>();
+        serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Singleton);
     }
 
     [Fact]
     public void AddSingleton_RegistersCorrectly()
     {
+        // Arrange
         var services = new ServiceCollection();
         services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
+        
+        // Act
+        using var scope = serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetService<SimpleSingletonClass>();
+        ServiceDescriptor serviceDescriptor = services.First(x => x.ServiceType == typeof(SimpleSingletonClass));
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var service = scope.ServiceProvider.GetService<SimpleSingletonClass>();
-
-            service.Should().NotBeNull().And.BeOfType<SimpleSingletonClass>();
-        }
+        // Assert
+        service.Should().NotBeNull().And.BeOfType<SimpleSingletonClass>();
+        serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Singleton);
     }
 }
 

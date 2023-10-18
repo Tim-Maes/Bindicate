@@ -1,9 +1,6 @@
 ﻿using Bindicate.Attributes;
 using Bindicate.Configuration;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
-using Xunit;
 
 namespace Bindicate.Tests.ScopedTests;
 
@@ -14,31 +11,37 @@ public class AddScopedAttributeTests
     [Fact]
     public void AddScoped_WithInterface_RegistersCorrectly()
     {
+        //Arrange
         var services = new ServiceCollection();
         services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var service = scope.ServiceProvider.GetService<IScopedInterface>();
+        //Act
+        using var scope = serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetService<IScopedInterface>();
+        ServiceDescriptor serviceDescriptor = services.First(x => x.ServiceType == typeof(IScopedInterface));
 
-            service.Should().NotBeNull().And.BeOfType<ScopedWithInterface>();
-        }
+        // Assert        
+        service.Should().NotBeNull().And.BeOfType<ScopedWithInterface>();
+        serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Scoped);
     }
 
     [Fact]
     public void AddScoped_RegistersCorrectly()
     {
+        // Arrange
         var services = new ServiceCollection();
         services.AddAutowiringForAssembly(_testAssembly);
         var serviceProvider = services.BuildServiceProvider();
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var service = scope.ServiceProvider.GetService<SimpleScopedClass>();
+        // Act
+        using var scope = serviceProvider.CreateScope();
+        var service = scope.ServiceProvider.GetService<SimpleScopedClass>();
+        ServiceDescriptor serviceDescriptor = services.First(x => x.ServiceType == typeof(SimpleScopedClass));
 
-            service.Should().NotBeNull().And.BeOfType<SimpleScopedClass>();
-        }
+        // Assert
+        service.Should().NotBeNull().And.BeOfType<SimpleScopedClass>();
+        serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Scoped);
     }
 }
 
