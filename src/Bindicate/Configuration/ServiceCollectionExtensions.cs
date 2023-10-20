@@ -99,11 +99,11 @@ public static class ServiceCollectionExtensions
     /// This method can be used as follows:
     /// <code>
     /// services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
-    ///         .ConfigureOptions(Configuration);
+    ///         .WithOptions(Configuration);
     /// </code>
     /// Assuming Configuration is of type IConfiguration and properly set up.
     /// </example>
-    public static IServiceCollection ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection WithOptions(this IServiceCollection services, IConfiguration configuration)
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
