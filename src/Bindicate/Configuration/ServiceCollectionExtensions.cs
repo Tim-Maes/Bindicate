@@ -1,8 +1,13 @@
 ﻿using Bindicate.Attributes;
+using Bindicate.Attributes.Options;
 using Bindicate.Lifetime;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
+using System.Diagnostics.Metrics;
 using System.Reflection;
+using System.Runtime.Intrinsics.X86;
 
 namespace Bindicate.Configuration;
 
@@ -75,6 +80,68 @@ public static class ServiceCollectionExtensions
                 else
                 {
                     throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
+                }
+            }
+        }
+
+        return services;
+    }
+
+    /// <summary>
+    /// Scans all loaded assemblies for classes decorated with the [RegisterOptions] attribute
+    /// and automatically configures those classes as options with the specified configuration section.
+    /// The method should be chained after AddAutowiringForAssembly().
+    /// </summary>
+    /// <param name="services">The IServiceCollection to add the services to.</param>
+    /// <param name="configuration">The application's configuration to read the option settings from.</param>
+    /// <returns>The same service collection so that multiple calls can be chained.</returns>
+    /// <example>
+    /// This method can be used as follows:
+    /// <code>
+    /// services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    ///         .ConfigureOptions(Configuration);
+    /// </code>
+    /// Assuming Configuration is of type IConfiguration and properly set up.
+    /// </example>
+    public static IServiceCollection ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+            {
+                var optionAttributes = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false)
+                                           .Cast<RegisterOptionsAttribute>();
+
+                foreach (var attr in optionAttributes)
+                {
+                    var configSection = configuration.GetSection(attr.ConfigurationSection);
+                    var genericMethod = typeof(OptionsConfigurationServiceCollectionExtensions).GetMethod("Configure", new[] { typeof(IConfiguration) });
+                    var specializedMethod = genericMethod.MakeGenericMethod(type);
+
+                    specializedMethod.Invoke(null, new object[] { services, configSection });
+
+                    // Add PostConfigure to perform validation
+                    var postConfigureMethod = typeof(OptionsServiceCollectionExtensions)
+                        .GetMethods()
+                        .Where(m => m.Name == "PostConfigure" && m.GetParameters().Length == 2)
+                        .First();
+                    var postConfigureSpecialized = postConfigureMethod.MakeGenericMethod(type);
+
+                    postConfigureSpecialized.Invoke(null, new object[]
+                    {
+                        services,
+                        new Action<object>(options =>
+                        {
+                            foreach (var prop in type.GetProperties())
+                            {
+                                var value = prop.GetValue(options);
+                                if (value == null || (prop.PropertyType.IsValueType && value.Equals(Activator.CreateInstance(prop.PropertyType))))
+                                {
+                                    throw new InvalidOperationException($"Missing configuration for property {prop.Name} in section {attr.ConfigurationSection}");
+                                }
+                            }
+                        })
+                    });
                 }
             }
         }
