@@ -82,49 +82,34 @@ public class AutowiringBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder WithOptions(IConfiguration configuration)
     {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
         {
-            foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+            var optionAttributes = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false)
+                                       .Cast<RegisterOptionsAttribute>();
+
+            foreach (var attr in optionAttributes)
             {
-                var optionAttributes = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false)
-                                           .Cast<RegisterOptionsAttribute>();
+                var configSection = configuration.GetSection(attr.ConfigurationSection);
 
-                foreach (var attr in optionAttributes)
+                if (configSection.Exists())
                 {
-                    var configSection = configuration.GetSection(attr.ConfigurationSection);
-
-                    var genericMethod = typeof(OptionsConfigurationServiceCollectionExtensions).GetMethod("Configure", new[] { typeof(IConfiguration) });
-
-                    //TODO: this throws always
-                    if (genericMethod == null) throw new InvalidOperationException("genericMethod is null");
-
-                    var specializedMethod = genericMethod.MakeGenericMethod(type);
-                    if (specializedMethod == null) throw new InvalidOperationException("specializedMethod is null");
-
-                    specializedMethod.Invoke(null, new object[] { _services, configSection });
-
-                    // Add PostConfigure to perform validation
-                    var postConfigureMethod = typeof(OptionsServiceCollectionExtensions)
+                    var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
                         .GetMethods()
-                        .Where(m => m.Name == "PostConfigure" && m.GetParameters().Length == 2)
-                        .First();
-                    var postConfigureSpecialized = postConfigureMethod.MakeGenericMethod(type);
+                        .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
 
-                    postConfigureSpecialized.Invoke(null, new object[]
+                    if (genericOptionsConfigureMethod != null)
                     {
-                        _services,
-                        new Action<object>(options =>
-                        {
-                            foreach (var prop in type.GetProperties())
-                            {
-                                var value = prop.GetValue(options);
-                                if (value == null || (prop.PropertyType.IsValueType && value.Equals(Activator.CreateInstance(prop.PropertyType))))
-                                {
-                                    throw new InvalidOperationException($"Missing configuration for property {prop.Name} in section {attr.ConfigurationSection}");
-                                }
-                            }
-                        })
-                    });
+                        var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
+                        specializedMethod.Invoke(null, new object[] { _services, configSection });
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Configure method not found.");
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Missing configuration section: {attr.ConfigurationSection}");
                 }
             }
         }
