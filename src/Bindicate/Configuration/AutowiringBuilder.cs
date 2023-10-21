@@ -21,6 +21,10 @@ public class AutowiringBuilder
         AddAutowiringForAssembly();
     }
 
+    /// <summary>
+    /// Scans the assembly to automatically wire up services based on the attributes.
+    /// </summary>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder AddAutowiringForAssembly()
     {
         foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
@@ -70,6 +74,12 @@ public class AutowiringBuilder
         return this;
     }
 
+    /// <summary>
+    /// Scans assemblies to find classes annotated with RegisterOptionsAttribute,
+    /// and configures them as options from the provided IConfiguration object.
+    /// </summary>
+    /// <param name="configuration">The IConfiguration object to read the settings from.</param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder AddOptions(IConfiguration configuration)
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -116,6 +126,10 @@ public class AutowiringBuilder
         return this;
     }
 
+    /// <summary>
+    /// Registers all configured services and options into the IServiceCollection.
+    /// </summary>
+    /// <returns>The IServiceCollection that services and options were registered into.</returns>
     public IServiceCollection Register()
     {
         return _services;
