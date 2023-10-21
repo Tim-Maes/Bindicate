@@ -91,13 +91,11 @@ public class AutowiringBuilder
 
                 foreach (var attr in optionAttributes)
                 {
-                    //TODO: remove these exceptions
-                    if (attr == null) throw new InvalidOperationException("attr is null");
-                    if (configuration == null) throw new InvalidOperationException("configuration is null");
-
                     var configSection = configuration.GetSection(attr.ConfigurationSection);
 
                     var genericMethod = typeof(OptionsConfigurationServiceCollectionExtensions).GetMethod("Configure", new[] { typeof(IConfiguration) });
+
+                    //TODO: this throws always
                     if (genericMethod == null) throw new InvalidOperationException("genericMethod is null");
 
                     var specializedMethod = genericMethod.MakeGenericMethod(type);
