@@ -80,7 +80,7 @@ public class AutowiringBuilder
     /// </summary>
     /// <param name="configuration">The IConfiguration object to read the settings from.</param>
     /// <returns>A reference to this instance after the operation has completed.</returns>
-    public AutowiringBuilder AddOptions(IConfiguration configuration)
+    public AutowiringBuilder WithOptions(IConfiguration configuration)
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
@@ -91,9 +91,16 @@ public class AutowiringBuilder
 
                 foreach (var attr in optionAttributes)
                 {
+                    if (attr == null) throw new InvalidOperationException("attr is null");
+                    if (configuration == null) throw new InvalidOperationException("configuration is null");
+
                     var configSection = configuration.GetSection(attr.ConfigurationSection);
+
                     var genericMethod = typeof(OptionsConfigurationServiceCollectionExtensions).GetMethod("Configure", new[] { typeof(IConfiguration) });
+                    if (genericMethod == null) throw new InvalidOperationException("genericMethod is null");
+
                     var specializedMethod = genericMethod.MakeGenericMethod(type);
+                    if (specializedMethod == null) throw new InvalidOperationException("specializedMethod is null");
 
                     specializedMethod.Invoke(null, new object[] { _services, configSection });
 
