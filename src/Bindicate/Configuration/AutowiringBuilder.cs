@@ -91,6 +91,7 @@ public class AutowiringBuilder
 
                 foreach (var attr in optionAttributes)
                 {
+                    //TODO: remove these exceptions
                     if (attr == null) throw new InvalidOperationException("attr is null");
                     if (configuration == null) throw new InvalidOperationException("configuration is null");
 
