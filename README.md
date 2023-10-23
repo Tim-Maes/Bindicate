@@ -140,7 +140,7 @@ public interface IMyTaskRunner
 
 Decorate your class containing the options with `[RegisterOptions]` and specify the corresponding section in `appsettings.json`.
 
-```
+```csharp
 [RegisterOptions("testOptions")]
 public class TestOptions
 {
