@@ -8,7 +8,7 @@
 ## Features 🌟
 
 - Automatic registration of services using custom attributes.
-- Automatic registration and configuration of options via IOptions<T>.
+- Automatic registration and configuration of options via `IOptions<T>`.
 - No need for explicit interface specification for class-only registrations.
 - Provides clear visibility and reduces boilerplate code.
 - Simple integration with the built-in .NET IoC container.
