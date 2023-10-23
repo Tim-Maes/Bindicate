@@ -11,9 +11,9 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://www.github.com/Tim-Maes/Bindicate</RepositoryUrl>
     <PackageTags>di, ioc, service, collection, extensions, attribute</PackageTags>
-    <PackageReleaseNotes>Can scan all assemblies</PackageReleaseNotes>
+    <PackageReleaseNotes>Add support for IOptions</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <Version>1.1.9</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

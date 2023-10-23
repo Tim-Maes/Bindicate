@@ -8,6 +8,7 @@
 ## Features 🌟
 
 - Automatic registration of services using custom attributes.
+- Automatic registration and configuration of options via `IOptions<T>`.
 - No need for explicit interface specification for class-only registrations.
 - Provides clear visibility and reduces boilerplate code.
 - Simple integration with the built-in .NET IoC container.
@@ -41,33 +42,51 @@ dotnet add package Bindicate
 
 ### Autowire dependencies
 
-**Register Services per Assembly**
+**Register Services**
 
 Add this line in a project to register all decorated services. You can repeat this line and pass any assembly.
+To also configure options, use `.WithOptions()`.
+You can also use the `ServiceCollectionExtension` pattern and use `IConfiguration` as a parameters for your extension method if they have options to register.
 
+**Example in host project**
 ```csharp
-// Register all types in current project
-services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly());
+// Register all decorated services in the current project
+builder.Services
+    .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    .Register();
 
-// Register types from referenced project
-services.AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface))); 
+// Also register Options as IOptions<T>
+builder.Services
+    .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    .WithOptions(Configuration)  //Pass builder.Configuration here
+    .Register();
+
+// Register types and options from referenced project
+builder.Services
+    .AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface)))
+    .WithOptions(Configuration)
+    .Register();
 ```
 
-**Register Services Across Multiple Assemblies**
-
-If you want to scan and register services across all loaded assemblies, you can do so by adding the following line in your hosting project:
-
-***Note** that this might not work if not all assemblies are loaded at this point in startup configuration*!
+**Example with ServiceCollectionExtensions**
 
 ```csharp
-// Trigger loading of unloaded assemblies to be able to use AddAutowiring:
-var triggerAssembly1 = typeof(ProjectName.SomeType);
-var triggerAssembly2 = typeof(OtherProjectName.SomeOtherType);
+// Hosting project:
+var configuration = builder.Configuration;
 
-services.AddAutowiring();
+builder.Services.AddSecondProject(configuration);
 
-//Or just use AddAutowiringForAssembly method
+// In other project
+public static IServiceCollection AddSecondProject(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+                .WithOptions(configuration)
+                .Register();
+
+        return services;
+    }
 ```
+
 
 ## Decorate your services:
 
@@ -116,6 +135,27 @@ public interface IMyTaskRunner
     void Run();
 }
 ```
+
+### Options Registration
+
+Decorate your class containing the options with `[RegisterOptions]` and specify the corresponding section in `appsettings.json`.
+
+```
+[RegisterOptions("testOptions")]
+public class TestOptions
+{
+    public string Test { get; set; } = "";
+}
+
+//appsettings.json:
+{
+  "testOptions": {
+    "test": "test"
+  }
+}
+```
+
+Now you can use this value when injection IOptions<TestOptions> in your service
 
 ### Generics
 
