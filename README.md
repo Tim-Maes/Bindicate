@@ -40,6 +40,8 @@ dotnet add package Bindicate
 ```
 ## Usage
 
+You can check out the [example project](https://github.com/Tim-Maes/Bindicate.Example) too!
+
 ### Autowire dependencies
 
 **Register Services**
