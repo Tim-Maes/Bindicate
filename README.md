@@ -155,7 +155,7 @@ public class TestOptions
 }
 ```
 
-Now you can use this value when injection IOptions<TestOptions> in your service
+Now you can use this value when injecting `IOptions<TestOptions>` in your service
 
 ### Generics
 
