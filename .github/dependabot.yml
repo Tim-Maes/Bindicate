@@ -1,0 +1,5 @@
+updates:
+  - package-ecosystem: "nuget"
+    directory: "src\Bindicate" # Location of package manifests
+    schedule:
+      interval: "weekly"
