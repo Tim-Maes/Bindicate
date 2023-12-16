@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace Bindicate.Configuration;
+namespace Bindicate;
 
 public static class ServiceCollectionExtensions
 {
