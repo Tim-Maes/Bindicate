@@ -1,6 +1,7 @@
 ﻿using Bindicate.Attributes;
 using Bindicate.Tests.ScopedTests;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace Bindicate.Tests.Transient;
 
 public class AddTransientAttributeTests
