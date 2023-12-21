@@ -1,4 +1,5 @@
 ﻿using Bindicate.Attributes;
+using Bindicate.Attributes.Scoped;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bindicate.Tests.ScopedTests;
@@ -42,6 +43,27 @@ public class AddScopedAttributeTests
         service.Should().NotBeNull().And.BeOfType<SimpleScopedClass>();
         serviceDescriptor.Lifetime.Should().Be(ServiceLifetime.Scoped);
     }
+
+
+    [Fact]
+    public void AddKeyedScoped_WithMultipleKeys_RegistersCorrectly()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddAutowiringForAssembly(_testAssembly).ForKeyedServices();
+        var serviceProvider = services.BuildServiceProvider();
+
+        // Act and Assert for the first key
+        using var scope1 = serviceProvider.CreateScope();
+        var service1 = scope1.ServiceProvider.GetKeyedService<IKeyedService>("myKey");
+        service1.Should().NotBeNull().And.BeOfType<KeyedService>();
+
+        // Act and Assert for the second key
+        using var scope2 = serviceProvider.CreateScope();
+        var service2 = scope2.ServiceProvider.GetKeyedService<IKeyedService>("mySecondKey");
+        service2.Should().NotBeNull().And.BeOfType<SecondKeyedService>();
+    }
+
 }
 
 [AddScoped]
@@ -51,3 +73,11 @@ public interface IScopedInterface { }
 
 [AddScoped(typeof(IScopedInterface))]
 public class ScopedWithInterface : IScopedInterface { }
+
+[AddKeyedScoped("myKey", typeof(IKeyedService))]
+public class KeyedService : IKeyedService { }
+
+[AddKeyedScoped("mySecondKey", typeof(IKeyedService))]
+public class SecondKeyedService : IKeyedService { }
+
+public interface IKeyedService { }

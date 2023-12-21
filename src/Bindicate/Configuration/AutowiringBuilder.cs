@@ -1,5 +1,6 @@
 ﻿using Bindicate.Attributes;
 using Bindicate.Attributes.Options;
+using Bindicate.Attributes.Scoped;
 using Bindicate.Lifetime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -101,6 +102,25 @@ public class AutowiringBuilder
 
                 var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
                 specializedMethod.Invoke(null, new object[] { _services, configSection });
+            }
+        }
+
+        return this;
+    }
+
+    public AutowiringBuilder ForKeyedServices()
+    {
+        foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+        {
+            var keyedAttributes = type.GetCustomAttributes(typeof(AddKeyedScopedAttribute), false)
+                                      .Cast<AddKeyedScopedAttribute>();
+
+            foreach (var attr in keyedAttributes)
+            {
+                var serviceType = attr.ServiceType ?? type;
+                var key = attr.Key;
+
+                _services.AddKeyedScoped(serviceType, key, type);
             }
         }
 
