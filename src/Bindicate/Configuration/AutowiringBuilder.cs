@@ -10,14 +10,15 @@ namespace Bindicate;
 
 public class AutowiringBuilder
 {
-    public IServiceCollection _services { get; }
+    private IServiceCollection _services { get; }
 
-    public Assembly _targetAssembly { get; }
+    private Assembly _targetAssembly { get; }
 
     public AutowiringBuilder(IServiceCollection services, Assembly targetAssembly)
     {
         _services = services;
         _targetAssembly = targetAssembly;
+
         AddAutowiringForAssembly();
     }
 

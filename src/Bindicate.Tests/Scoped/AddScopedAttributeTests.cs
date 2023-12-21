@@ -1,5 +1,4 @@
 ﻿using Bindicate.Attributes;
-using Bindicate.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bindicate.Tests.ScopedTests;

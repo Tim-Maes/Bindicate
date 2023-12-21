@@ -1,5 +1,4 @@
-﻿using Bindicate.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Bindicate.Tests.Generic;
 
