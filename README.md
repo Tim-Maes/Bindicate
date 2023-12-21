@@ -137,7 +137,7 @@ public interface IMyTaskRunner
 }
 ```
 
-** When using keyed services:**
+**When using keyed services:**
 
 Decorate your class with the attribute and provide the key
 
