@@ -56,9 +56,16 @@ builder.Services
     .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
     .Register();
 
+// Also register Keyed Services (.NET 8)
+builder.Services
+    .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    .ForKeyedServices()
+    .Register();
+
 // Also register Options as IOptions<T>
 builder.Services
     .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    .ForKeyedServices()
     .WithOptions(Configuration)  //Pass builder.Configuration here
     .Register();
 
