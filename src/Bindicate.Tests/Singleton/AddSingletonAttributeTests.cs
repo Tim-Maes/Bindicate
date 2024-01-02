@@ -1,18 +1,17 @@
 ﻿using Bindicate.Attributes;
-using Bindicate.Tests.ScopedTests;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bindicate.Tests.Singleton;
 
 public class AddSingletonAttributeTests
 {
-    private readonly Assembly _testAssembly = typeof(AddScopedAttributeTests).Assembly;
+    private readonly Assembly _testAssembly = typeof(AddSingletonAttributeTests).Assembly;
 
     [Fact]
     public void AddSingleton_AlwaysReturnsSame()
     {
         var services = new ServiceCollection();
-        services.AddAutowiringForAssembly(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly).Register();
         var serviceProvider = services.BuildServiceProvider();
 
         var instance1 = serviceProvider.GetService<ISingletonInterface>();
@@ -26,7 +25,7 @@ public class AddSingletonAttributeTests
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddAutowiringForAssembly(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly).Register();
         var serviceProvider = services.BuildServiceProvider();
 
         // Act
@@ -44,7 +43,7 @@ public class AddSingletonAttributeTests
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddAutowiringForAssembly(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly).Register();
         var serviceProvider = services.BuildServiceProvider();
         
         // Act

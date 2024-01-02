@@ -17,11 +17,11 @@
 
 | **Type**           | **Available** |  **Keyed (.NET 8)** |
 |--------------------|----------|------------------------------|
-|AddTransient        |✔️        |❌                            |
+|AddTransient        |✔️        |✔️                            |
 |TryAddTransient     |✔️        |❌                            |
 |AddScoped           |✔️        |✔️                             |
 |TryAddScoped        |✔️        |❌                            |
-|AddSingleton        |✔️        |❌                            |
+|AddSingleton        |✔️        |✔️                            |
 |TryAddSingleton     |✔️        |❌                            |
 |TryAddEnumerable    |❌        |❌                           |
 </center>

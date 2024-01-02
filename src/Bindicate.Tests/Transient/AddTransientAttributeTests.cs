@@ -1,18 +1,17 @@
 ﻿using Bindicate.Attributes;
-using Bindicate.Tests.ScopedTests;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bindicate.Tests.Transient;
 
 public class AddTransientAttributeTests
 {
-    private readonly Assembly _testAssembly = typeof(AddScopedAttributeTests).Assembly;
+    private readonly Assembly _testAssembly = typeof(AddTransientAttributeTests).Assembly;
 
     [Fact]
     public void AddTransient_AlwaysReturnsNewInstance()
     {
         var services = new ServiceCollection();
-        services.AddAutowiringForAssembly(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly).Register();
         var serviceProvider = services.BuildServiceProvider();
 
         var instance1 = serviceProvider.GetService<ITransientInterface>();
@@ -26,7 +25,7 @@ public class AddTransientAttributeTests
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddAutowiringForAssembly(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly).Register();
         var serviceProvider = services.BuildServiceProvider();
         
         // Act
@@ -44,7 +43,7 @@ public class AddTransientAttributeTests
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddAutowiringForAssembly(_testAssembly);
+        services.AddAutowiringForAssembly(_testAssembly).Register();
         var serviceProvider = services.BuildServiceProvider();
 
         // Act
