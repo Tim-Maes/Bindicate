@@ -167,7 +167,7 @@ public class KeyedService : IKeyedService
 	}
 }
 
-[AddScoped("anotherKey")]
+[AddScoped("anotherKey", typeof(IKeyedService))]
 public class AnotherKeyedService : IKeyedService
 {
 	public void Run()
