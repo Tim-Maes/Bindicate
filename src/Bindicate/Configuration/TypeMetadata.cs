@@ -1,4 +1,5 @@
 ﻿namespace Bindicate.Configuration;
+
 public class TypeMetadata
 {
     public Type Type { get; }

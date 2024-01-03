@@ -3,6 +3,7 @@ using Bindicate.Attributes.Options;
 using Bindicate.Attributes.Scoped;
 using Bindicate.Attributes.Singleton;
 using Bindicate.Attributes.Transient;
+using Bindicate.Configuration;
 using Bindicate.Lifetime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -140,19 +141,24 @@ public class AutowiringBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder ForKeyedServices()
     {
-        foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+        foreach (var typeMetadata in _typeMetadatas)
         {
-            var keyedAttributes = type.GetCustomAttributes(typeof(BaseKeyedServiceAttribute), false)
+            if (typeMetadata.HasBaseKeyedServiceAttribute)
+            {
+                var type = typeMetadata.Type;
+
+                var keyedAttributes = type.GetCustomAttributes(typeof(BaseKeyedServiceAttribute), false)
                                       .Cast<BaseKeyedServiceAttribute>();
 
-            foreach (var attr in keyedAttributes)
-            {
-                var serviceType = attr.ServiceType ?? type;
-                var key = attr.Key;
+                foreach (var attr in keyedAttributes)
+                {
+                    var serviceType = attr.ServiceType ?? type;
+                    var key = attr.Key;
 
-                var registrationMethod = GetKeyedRegistrationMethod(_services, attr);
+                    var registrationMethod = GetKeyedRegistrationMethod(_services, attr);
 
-                registrationMethod(serviceType, key, type);
+                    registrationMethod(serviceType, key, type);
+                }
             }
         }
 
