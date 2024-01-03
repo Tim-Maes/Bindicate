@@ -11,15 +11,31 @@ namespace Bindicate;
 public class AutowiringBuilder
 {
     private IServiceCollection _services { get; }
+    private readonly List<TypeMetadata> _typeMetadatas;
 
-    private Assembly _targetAssembly { get; }
 
     public AutowiringBuilder(IServiceCollection services, Assembly targetAssembly)
     {
         _services = services;
-        _targetAssembly = targetAssembly;
+        _typeMetadatas = ScanAssembly(targetAssembly);
 
         AddAutowiringForAssembly();
+    }
+    private List<TypeMetadata> ScanAssembly(Assembly assembly)
+    {
+        var typeMetadatas = new List<TypeMetadata>();
+
+        foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+        {
+            var hasRegisterOptionsAttribute = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false).Any();
+            var hasBaseServiceAttribute = type.GetCustomAttributes(typeof(BaseServiceAttribute), false).Any();
+            var hasBaseKeyedServiceAttribute = type.GetCustomAttributes(typeof(BaseKeyedServiceAttribute), false).Any();
+
+            var typeMetadata = new TypeMetadata(type, hasRegisterOptionsAttribute, hasBaseServiceAttribute, hasBaseKeyedServiceAttribute);
+            typeMetadatas.Add(typeMetadata);
+        }
+
+        return typeMetadatas;
     }
 
     /// <summary>
@@ -28,46 +44,50 @@ public class AutowiringBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder AddAutowiringForAssembly()
     {
-        foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+        foreach (var typeMetadata in _typeMetadatas)
         {
-            var registerAttributes = type.GetCustomAttributes(typeof(BaseServiceAttribute), false)
-                                         .Cast<BaseServiceAttribute>();
-
-            foreach (var attr in registerAttributes)
+            if (typeMetadata.HasBaseServiceAttribute)
             {
-                var serviceType = attr.ServiceType ?? type;
-                var registrationMethod = GetRegistrationMethod(_services, attr.Lifetime);
+                var type = typeMetadata.Type;
+                var registerAttributes = type.GetCustomAttributes(typeof(BaseServiceAttribute), false)
+                                             .Cast<BaseServiceAttribute>();
 
-                if (serviceType.IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
+                foreach (var attr in registerAttributes)
                 {
-                    if (serviceType.IsGenericType)
+                    var serviceType = attr.ServiceType ?? type;
+                    var registrationMethod = GetRegistrationMethod(_services, attr.Lifetime);
+
+                    if (serviceType.IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
                     {
-                        _services.Add(ServiceDescriptor.Describe(
-                            serviceType.GetGenericTypeDefinition(),
-                            type.GetGenericTypeDefinition(),
-                            attr.Lifetime.ConvertToServiceLifetime())
-                        );
-                    }
-                    else
-                    {
-                        // Handle non-generic services with generic interfaces
-                        foreach (var iface in type.GetInterfaces())
+                        if (serviceType.IsGenericType)
                         {
-                            if (iface.IsGenericType && iface.GetGenericTypeDefinition().IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
+                            _services.Add(ServiceDescriptor.Describe(
+                                serviceType.GetGenericTypeDefinition(),
+                                type.GetGenericTypeDefinition(),
+                                attr.Lifetime.ConvertToServiceLifetime())
+                            );
+                        }
+                        else
+                        {
+                            // Handle non-generic services with generic interfaces
+                            foreach (var iface in type.GetInterfaces())
                             {
-                                var genericInterface = iface.GetGenericTypeDefinition();
-                                _services.Add(ServiceDescriptor.Describe(genericInterface, type, attr.Lifetime.ConvertToServiceLifetime()));
+                                if (iface.IsGenericType && iface.GetGenericTypeDefinition().IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
+                                {
+                                    var genericInterface = iface.GetGenericTypeDefinition();
+                                    _services.Add(ServiceDescriptor.Describe(genericInterface, type, attr.Lifetime.ConvertToServiceLifetime()));
+                                }
                             }
                         }
                     }
-                }
-                else if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
-                {
-                    RegisterService(serviceType, type, registrationMethod);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
+                    else if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
+                    {
+                        RegisterService(serviceType, type, registrationMethod);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Type {type.FullName} does not implement {serviceType.FullName}");
+                    }
                 }
             }
         }
@@ -83,24 +103,28 @@ public class AutowiringBuilder
     /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder WithOptions(IConfiguration configuration)
     {
-        foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+        foreach (var typeMetadata in _typeMetadatas)
         {
-            var optionAttributes = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false)
+            if (typeMetadata.HasRegisterOptionsAttribute)
+            {
+                var type = typeMetadata.Type;
+                var optionAttributes = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false)
                                        .Cast<RegisterOptionsAttribute>();
 
-            foreach (var attr in optionAttributes)
-            {
-                var configSection = configuration.GetSection(attr.ConfigurationSection);
+                foreach (var attr in optionAttributes)
+                {
+                    var configSection = configuration.GetSection(attr.ConfigurationSection);
 
-                if (!configSection.Exists())
-                    throw new InvalidOperationException($"Missing configuration section: {attr.ConfigurationSection}");
+                    if (!configSection.Exists())
+                        throw new InvalidOperationException($"Missing configuration section: {attr.ConfigurationSection}");
 
-                var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
-                        .GetMethods()
-                        .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
+                    var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
+                            .GetMethods()
+                            .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
 
-                var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
-                specializedMethod.Invoke(null, new object[] { _services, configSection });
+                    var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
+                    specializedMethod.Invoke(null, new object[] { _services, configSection });
+                }
             }
         }
 
