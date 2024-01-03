@@ -15,15 +15,15 @@
 ### Supported types
 <center>
 
-| Type           | Supported|
-|----------------|----------|
-|AddTransient    |✔️        |
-|TryAddTransient |✔️        |
-|AddScoped       |✔️        |
-|TryAddScoped    |✔️        |
-|AddSingleton    |✔️        |
-|TryAddSingleton |✔️        |
-|TryAddEnumerable|❌       |
+| **Type**           | **Available** |  **Keyed (.NET 8)** |
+|--------------------|----------|------------------------------|
+|AddTransient        |✔️        |✔️                            |
+|TryAddTransient     |✔️        |❌                            |
+|AddScoped           |✔️        |✔️                             |
+|TryAddScoped        |✔️        |❌                            |
+|AddSingleton        |✔️        |✔️                            |
+|TryAddSingleton     |✔️        |❌                            |
+|TryAddEnumerable    |❌        |❌                           |
 </center>
 
 ## Installation 📦
@@ -56,9 +56,16 @@ builder.Services
     .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
     .Register();
 
+// Also register Keyed Services (.NET 8)
+builder.Services
+    .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    .ForKeyedServices()
+    .Register();
+
 // Also register Options as IOptions<T>
 builder.Services
     .AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
+    .ForKeyedServices()
     .WithOptions(Configuration)  //Pass builder.Configuration here
     .Register();
 
@@ -134,6 +141,39 @@ public class TaskRunner : IMyTaskRunner
 public interface IMyTaskRunner
 {
     void Run();
+}
+```
+
+**When using keyed services:**
+
+Decorate your class with the attribute and provide the key
+
+```csharp
+[AddScoped("myKey")]
+public class KeyedService
+{
+	public void Run()
+	{
+		// ...
+	}
+}
+
+[AddScoped("key", typeof(IKeyedService))]
+public class KeyedService : IKeyedService
+{
+	public void Run()
+	{
+		// ...
+	}
+}
+
+[AddScoped("anotherKey")]
+public class AnotherKeyedService : IKeyedService
+{
+	public void Run()
+	{
+		// ...
+	}
 }
 ```
 

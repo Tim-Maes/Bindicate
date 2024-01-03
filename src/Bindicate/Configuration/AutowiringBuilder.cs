@@ -1,5 +1,8 @@
 ﻿using Bindicate.Attributes;
 using Bindicate.Attributes.Options;
+using Bindicate.Attributes.Scoped;
+using Bindicate.Attributes.Singleton;
+using Bindicate.Attributes.Transient;
 using Bindicate.Lifetime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -132,6 +135,31 @@ public class AutowiringBuilder
     }
 
     /// <summary>
+    /// Scans the assembly to automatically wire up keyed services based on the attributes.
+    /// </summary>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public AutowiringBuilder ForKeyedServices()
+    {
+        foreach (var type in _targetAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
+        {
+            var keyedAttributes = type.GetCustomAttributes(typeof(BaseKeyedServiceAttribute), false)
+                                      .Cast<BaseKeyedServiceAttribute>();
+
+            foreach (var attr in keyedAttributes)
+            {
+                var serviceType = attr.ServiceType ?? type;
+                var key = attr.Key;
+
+                var registrationMethod = GetKeyedRegistrationMethod(_services, attr);
+
+                registrationMethod(serviceType, key, type);
+            }
+        }
+
+        return this;
+    }
+
+    /// <summary>
     /// Registers all configured services and options into the IServiceCollection.
     /// </summary>
     /// <returns>The IServiceCollection that services and options were registered into.</returns>
@@ -139,6 +167,15 @@ public class AutowiringBuilder
     {
         return _services;
     }
+    private static Action<Type, object, Type> GetKeyedRegistrationMethod(IServiceCollection services, BaseKeyedServiceAttribute attr)
+    => attr switch
+    {
+        AddKeyedScopedAttribute _ => (s, k, t) => services.AddKeyedScoped(s, k, t),
+        AddKeyedSingletonAttribute _ => (s, k, t) => services.AddKeyedSingleton(s, k, t),
+        AddKeyedTransientAttribute _ => (s, k, t) => services.AddKeyedTransient(s, k, t),
+        _ => throw new ArgumentOutOfRangeException(nameof(attr), "Unsupported attribute type.")
+    };
+
 
     private static Action<Type, Type> GetRegistrationMethod(IServiceCollection services, Lifetime.Lifetime lifetime)
         => lifetime switch
