@@ -1,4 +1,4 @@
-# Bindicate 🧷
+![image](https://github.com/Tim-Maes/Bindicate/assets/91606949/b2779c49-3d84-43ef-ad98-93f1108e3aa6)
 
 ```
 'A blend of "Bind" and "Indicate"'.
