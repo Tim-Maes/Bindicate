@@ -69,33 +69,7 @@ builder.Services
     .ForKeyedServices()
     .WithOptions(Configuration)  //Pass builder.Configuration here
     .Register();
-
-// Register types and options from referenced project
-builder.Services
-    .AddAutowiringForAssembly(Assembly.GetAssembly(typeof(IInterface)))
-    .WithOptions(Configuration)
-    .Register();
 ```
-
-**Example with ServiceCollectionExtensions**
-
-```csharp
-// Hosting project:
-var configuration = builder.Configuration;
-
-builder.Services.AddSecondProject(configuration);
-
-// In other project
-public static IServiceCollection AddSecondProject(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddAutowiringForAssembly(Assembly.GetExecutingAssembly())
-                .WithOptions(configuration)
-                .Register();
-
-        return services;
-    }
-```
-
 
 ## Decorate your services:
 
