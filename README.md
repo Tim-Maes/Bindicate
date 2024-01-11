@@ -11,6 +11,7 @@
 - Automatic registration and configuration of options via `IOptions<T>`.
 - Provides clear visibility and reduces boilerplate code.
 - Simple integration with the built-in .NET IoC container.
+- Supports Keyed Services
 
 ### Supported types
 <center>
