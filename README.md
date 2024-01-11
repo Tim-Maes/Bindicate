@@ -149,7 +149,7 @@ public interface IMyTaskRunner
 Decorate your class with the attribute and provide the key
 
 ```csharp
-[AddScoped("myKey")]
+[AddKeyedScoped("myKey")]
 public class KeyedService
 {
 	public void Run()
@@ -158,7 +158,7 @@ public class KeyedService
 	}
 }
 
-[AddScoped("key", typeof(IKeyedService))]
+[AddKeyedScoped("key", typeof(IKeyedService))]
 public class KeyedService : IKeyedService
 {
 	public void Run()
@@ -167,7 +167,7 @@ public class KeyedService : IKeyedService
 	}
 }
 
-[AddScoped("anotherKey", typeof(IKeyedService))]
+[AddKeyedScoped("anotherKey", typeof(IKeyedService))]
 public class AnotherKeyedService : IKeyedService
 {
 	public void Run()
