@@ -27,6 +27,16 @@
 |TryAddEnumerable    |❌        |❌                           |
 </center>
 
+### Supported pattern
+<center>
+
+| **Type**           | **Available** |
+|--------------------|----------|------------------------------|
+|Decorator        |✔️                                           |
+|Interceptor     |❌        |                            |
+|Activator     |❌        |                            |
+</center>
+
 ## Installation 📦
 
 ### Via NuGet
