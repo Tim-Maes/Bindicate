@@ -297,6 +297,32 @@ public class LoggingDecorator : IMyService
 }
 ```
 
+### Decorators with generics:
+
+You can also create decorators for generic services.
+
+```csharp
+[RegisterDecorator(typeof(IRepository<>))]
+public class RepositoryLoggingDecorator<T> : IRepository<T> where T : BaseEntity
+{
+    private readonly IRepository<T> _innerRepository;
+
+    public RepositoryLoggingDecorator(IRepository<T> innerRepository)
+    {
+        _innerRepository = innerRepository;
+    }
+
+    public void Add(T entity)
+    {
+        Console.WriteLine($"Adding entity of type {typeof(T).Name}");
+        _innerRepository.Add(entity);
+        Console.WriteLine($"Added entity of type {typeof(T).Name}");
+    }
+}
+```
+
+Now, when you resolve `IRepository<Customer>` or `IRepository<Product>`, the `RepositoryLoggingDecorator<T>` will be applied.
+
 ## License
 
 This project is licensed under the MIT license.
