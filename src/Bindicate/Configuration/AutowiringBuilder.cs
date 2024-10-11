@@ -25,22 +25,25 @@ public class AutowiringBuilder
 
         AddAutowiringForAssembly();
     }
+
     private List<TypeMetadata> ScanAssembly(Assembly assembly)
     {
         var typeMetadatas = new List<TypeMetadata>();
 
         foreach (var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract))
         {
-            var hasRegisterOptionsAttribute = type.GetCustomAttributes(typeof(RegisterOptionsAttribute), false).Any();
-            var hasBaseServiceAttribute = type.GetCustomAttributes(typeof(BaseServiceAttribute), false).Any();
-            var hasBaseKeyedServiceAttribute = type.GetCustomAttributes(typeof(BaseKeyedServiceAttribute), false).Any();
+            var hasRegisterOptionsAttribute = type.IsDefined(typeof(RegisterOptionsAttribute), false);
+            var hasBaseServiceAttribute = type.IsDefined(typeof(BaseServiceAttribute), false);
+            var hasBaseKeyedServiceAttribute = type.IsDefined(typeof(BaseKeyedServiceAttribute), false);
+            var hasDecoratorAttribute = type.IsDefined(typeof(RegisterDecoratorAttribute), false);
 
-            var typeMetadata = new TypeMetadata(type, hasRegisterOptionsAttribute, hasBaseServiceAttribute, hasBaseKeyedServiceAttribute);
+            var typeMetadata = new TypeMetadata(type, hasRegisterOptionsAttribute, hasBaseServiceAttribute, hasBaseKeyedServiceAttribute, hasDecoratorAttribute);
             typeMetadatas.Add(typeMetadata);
         }
 
         return typeMetadatas;
     }
+
 
     /// <summary>
     /// Scans the assembly to automatically wire up services based on the attributes.
@@ -166,11 +169,110 @@ public class AutowiringBuilder
     }
 
     /// <summary>
+    /// Scans the assembly to automatically wire up decorators based on the attributes.
+    /// </summary>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public AutowiringBuilder AddDecorators()
+    {
+        var decoratorsByService = _typeMetadatas
+            .Where(tm => tm.HasDecoratorAttribute)
+            .SelectMany(tm => tm.Type.GetCustomAttributes<RegisterDecoratorAttribute>()
+                .Select(attr => new
+                {
+                    ServiceType = attr.ServiceType,
+                    Order = attr.Order,
+                    DecoratorType = tm.Type
+                }))
+            .GroupBy(x => x.ServiceType)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderBy(x => x.Order).Select(x => x.DecoratorType).ToList()
+            );
+
+        foreach (var kvp in decoratorsByService)
+        {
+            var serviceType = kvp.Key;
+            var decoratorTypes = kvp.Value;
+
+            var originalDescriptorIndex = _services
+                .Select((sd, index) => new { sd, index })
+                .FirstOrDefault(sd => sd.sd.ServiceType == serviceType);
+
+            if (originalDescriptorIndex == null)
+            {
+                throw new InvalidOperationException($"Service type {serviceType.FullName} is not registered.");
+            }
+
+            _services.RemoveAt(originalDescriptorIndex.index);
+
+            ServiceDescriptor currentDescriptor = originalDescriptorIndex.sd;
+
+            foreach (var decoratorType in decoratorTypes)
+            {
+                currentDescriptor = CreateDecoratorDescriptor(serviceType, decoratorType, currentDescriptor);
+            }
+
+            _services.Insert(originalDescriptorIndex.index, currentDescriptor);
+        }
+
+        return this;
+    }
+
+    private ServiceDescriptor CreateDecoratorDescriptor(Type serviceType, Type decoratorType, ServiceDescriptor previousDescriptor)
+    {
+        Func<IServiceProvider, object> previousImplementationFactory;
+
+        if (previousDescriptor.ImplementationFactory != null)
+        {
+            previousImplementationFactory = previousDescriptor.ImplementationFactory;
+        }
+        else if (previousDescriptor.ImplementationInstance != null)
+        {
+            var instance = previousDescriptor.ImplementationInstance;
+            previousImplementationFactory = provider => instance;
+        }
+        else if (previousDescriptor.ImplementationType != null)
+        {
+            var implementationType = previousDescriptor.ImplementationType;
+            previousImplementationFactory = provider => ActivatorUtilities.CreateInstance(provider, implementationType);
+        }
+        else
+        {
+            throw new InvalidOperationException("Unsupported service descriptor.");
+        }
+
+        return ServiceDescriptor.Describe(
+            serviceType,
+            provider =>
+            {
+                var decoratorConstructor = decoratorType.GetConstructors().First();
+                var parameters = decoratorConstructor.GetParameters();
+
+                var args = parameters.Select(p =>
+                {
+                    if (p.ParameterType == serviceType)
+                    {
+                        return previousImplementationFactory(provider);
+                    }
+                    else
+                    {
+                        return provider.GetService(p.ParameterType);
+                    }
+                }).ToArray();
+
+                return Activator.CreateInstance(decoratorType, args);
+            },
+            previousDescriptor.Lifetime
+        );
+    }
+
+    /// <summary>
     /// Registers all configured services and options into the IServiceCollection.
     /// </summary>
     /// <returns>The IServiceCollection that services and options were registered into.</returns>
     public IServiceCollection Register()
     {
+        AddDecorators();
         return _services;
     }
     private static Action<Type, object, Type> GetKeyedRegistrationMethod(IServiceCollection services, BaseKeyedServiceAttribute attr)
