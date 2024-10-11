@@ -152,6 +152,67 @@ public class AnotherKeyedService : IKeyedService
 }
 ```
 
+### Options Registration
+
+Decorate your class containing the options with `[RegisterOptions]` and specify the corresponding section in `appsettings.json`.
+
+```csharp
+[RegisterOptions("testOptions")]
+public class TestOptions
+{
+    public string Test { get; set; } = "";
+}
+
+//appsettings.json:
+{
+  "testOptions": {
+    "test": "test"
+  }
+}
+```
+
+Now you can use this value when injecting `IOptions<TestOptions>` in your service
+
+### Generics
+
+**Define a generic interface:**
+
+Decorate the generic interface with the `[RegisterGenericInterface]` attribute.
+
+```csharp
+[RegisterGenericInterface]
+public interface IRepository<T> where T : BaseEntity
+{
+    void add(T entity);
+}
+```
+
+**Create the implementation:**
+```csharp
+[AddTransient(typeof(IRepository<>))]
+public class Repository<T> : IRepository<T> where T : BaseEntity
+{
+    public Repository()
+    {
+    }
+
+    public void add(T entity)
+    {
+        // Implementation here
+    }
+}
+```
+
+**How to use** 
+
+You can now resolve instances of this type from `IServiceProvider`
+```csharp
+var customerRepo = serviceProvider.GetService<IRepository<Customer>>();
+var productRepo = serviceProvider.GetService<IRepository<Product>>();
+```
+
+Both customerRepo and productRepo will be instances of Repository<T> but will operate on Customer and Product types, respectively.
+
 ### Decorators
 
 Bindicate allows you to register decorators using attributes. Decorators wrap existing services to add additional behavior while preserving the original service's interface.
@@ -235,67 +296,6 @@ public class LoggingDecorator : IMyService
     }
 }
 ```
-
-### Options Registration
-
-Decorate your class containing the options with `[RegisterOptions]` and specify the corresponding section in `appsettings.json`.
-
-```csharp
-[RegisterOptions("testOptions")]
-public class TestOptions
-{
-    public string Test { get; set; } = "";
-}
-
-//appsettings.json:
-{
-  "testOptions": {
-    "test": "test"
-  }
-}
-```
-
-Now you can use this value when injecting `IOptions<TestOptions>` in your service
-
-### Generics
-
-**Define a generic interface:**
-
-Decorate the generic interface with the `[RegisterGenericInterface]` attribute.
-
-```csharp
-[RegisterGenericInterface]
-public interface IRepository<T> where T : BaseEntity
-{
-    void add(T entity);
-}
-```
-
-**Create the implementation:**
-```csharp
-[AddTransient(typeof(IRepository<>))]
-public class Repository<T> : IRepository<T> where T : BaseEntity
-{
-    public Repository()
-    {
-    }
-
-    public void add(T entity)
-    {
-        // Implementation here
-    }
-}
-```
-
-**How to use** 
-
-You can now resolve instances of this type from `IServiceProvider`
-```csharp
-var customerRepo = serviceProvider.GetService<IRepository<Customer>>();
-var productRepo = serviceProvider.GetService<IRepository<Product>>();
-```
-
-Both customerRepo and productRepo will be instances of Repository<T> but will operate on Customer and Product types, respectively.
 
 ## License
 
