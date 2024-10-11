@@ -16,25 +16,15 @@
 ### Supported types
 <center>
 
-| **Type**           | **Available** |  **Keyed (.NET 8)** |
-|--------------------|----------|------------------------------|
-|AddTransient        |✔️        |✔️                            |
-|TryAddTransient     |✔️        |❌                            |
-|AddScoped           |✔️        |✔️                             |
-|TryAddScoped        |✔️        |❌                            |
-|AddSingleton        |✔️        |✔️                            |
-|TryAddSingleton     |✔️        |❌                            |
-|TryAddEnumerable    |❌        |❌                           |
-</center>
-
-### Supported pattern
-<center>
-
-| **Type**           | **Available** |
-|--------------------|----------|
-|Decorator        |✔️                                           |
-|Interceptor     |❌        |                            |
-|Activator     |❌        |                            |
+| **Type**           | **Available** |  **Keyed (.NET 8)** | Decorators |Interceptors | Activators |
+|--------------------|----------|------------------------------|---------|------------|------------|
+|AddTransient        |✔️        |✔️                            | ✔️|❌ |❌ |
+|TryAddTransient     |✔️        |❌                            | ❌| ❌|❌ |
+|AddScoped           |✔️        |✔️                             |✔️ | ❌| ❌|
+|TryAddScoped        |✔️        |❌                            |❌ |❌ |❌ |
+|AddSingleton        |✔️        |✔️                            | ✔️| ❌| ❌|
+|TryAddSingleton     |✔️        |❌                            |❌ |❌ |❌ |
+|TryAddEnumerable    |❌        |❌                           | ❌| ❌|❌ |
 </center>
 
 ## Installation 📦
@@ -159,6 +149,90 @@ public class AnotherKeyedService : IKeyedService
 	{
 		// ...
 	}
+}
+```
+
+### Decorators
+
+Bindicate allows you to register decorators using attributes. Decorators wrap existing services to add additional behavior while preserving the original service's interface.
+
+#### Defining a decorator:
+
+Decorate your class with the `[RegisterDecorator]` attribute, specifying the service type it decorates.
+
+```csharp
+[RegisterDecorator(typeof(IMyService))]
+public class MyServiceDecorator : IMyService
+{
+    private readonly IMyService _innerService;
+
+    public MyServiceDecorator(IMyService innerService)
+    {
+        _innerService = innerService;
+    }
+
+    public void DoSomething()
+    {
+        // Add pre-processing logic here
+
+        _innerService.DoSomething();
+
+        // Add post-processing logic here
+    }
+}
+```
+
+#### Registering decorators:
+
+Decorators are automatically applied when you call `.Register()` in your service registration.
+
+#### Order of decorators:
+
+If you have multiple decorators for the same service, you can specify the order in which they are applied using the `Order` parameter.
+
+```csharp
+[RegisterDecorator(typeof(IMyService), Order = 1)]
+public class FirstDecorator : IMyService
+{
+    // ...
+}
+
+[RegisterDecorator(typeof(IMyService), Order = 2)]
+public class SecondDecorator : IMyService
+{
+    // ...
+}
+```
+Decorators with lower `Order` values are applied first. In this example, `FirstDecorator` will wrap `MyService`, and `SecondDecorator` will wrap `FirstDecorator`.
+
+**Using the decorated service:**
+
+When you resolve `IMyService` from the service provider, you will get the outermost decorator.
+
+```csharp
+var myService = serviceProvider.GetRequiredService<IMyService>();
+myService.DoSomething();
+```
+
+**Example with a logging decorator:**
+
+```csharp
+[RegisterDecorator(typeof(IMyService))]
+public class LoggingDecorator : IMyService
+{
+    private readonly IMyService _innerService;
+
+    public LoggingDecorator(IMyService innerService)
+    {
+        _innerService = innerService;
+    }
+
+    public void DoSomething()
+    {
+        Console.WriteLine("Before DoSomething");
+        _innerService.DoSomething();
+        Console.WriteLine("After DoSomething");
+    }
 }
 ```
 
