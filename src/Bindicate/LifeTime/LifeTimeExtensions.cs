@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Bindicate.Lifetime;
+namespace Bindicate;
 
 public static class LifetimeExtensions
 {

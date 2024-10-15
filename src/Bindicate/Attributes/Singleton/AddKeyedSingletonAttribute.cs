@@ -10,5 +10,5 @@ public class AddKeyedSingletonAttribute : BaseKeyedServiceAttribute
     {
     }
 
-    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.Singleton;
+    public override Lifetime Lifetime => Bindicate.Lifetime.Singleton;
 }

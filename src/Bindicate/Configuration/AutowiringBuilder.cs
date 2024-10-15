@@ -1,10 +1,10 @@
 ﻿using Bindicate.Attributes;
+using Bindicate.Attributes.Enumerable;
 using Bindicate.Attributes.Options;
 using Bindicate.Attributes.Scoped;
 using Bindicate.Attributes.Singleton;
 using Bindicate.Attributes.Transient;
 using Bindicate.Configuration;
-using Bindicate.Lifetime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -36,19 +36,22 @@ public class AutowiringBuilder
             var hasBaseServiceAttribute = type.IsDefined(typeof(BaseServiceAttribute), false);
             var hasBaseKeyedServiceAttribute = type.IsDefined(typeof(BaseKeyedServiceAttribute), false);
             var hasDecoratorAttribute = type.IsDefined(typeof(RegisterDecoratorAttribute), false);
+            var hasTryAddEnumerableAttribute = type.IsDefined(typeof(TryAddEnumerableAttribute), false);
 
-            var typeMetadata = new TypeMetadata(type, hasRegisterOptionsAttribute, hasBaseServiceAttribute, hasBaseKeyedServiceAttribute, hasDecoratorAttribute);
+            var typeMetadata = new TypeMetadata(
+                type,
+                hasRegisterOptionsAttribute,
+                hasBaseServiceAttribute,
+                hasBaseKeyedServiceAttribute,
+                hasDecoratorAttribute,
+                hasTryAddEnumerableAttribute);
+
             typeMetadatas.Add(typeMetadata);
         }
 
         return typeMetadatas;
     }
 
-
-    /// <summary>
-    /// Scans the assembly to automatically wire up services based on the attributes.
-    /// </summary>
-    /// <returns>A reference to this instance after the operation has completed.</returns>
     public AutowiringBuilder AddAutowiringForAssembly()
     {
         foreach (var typeMetadata in _typeMetadatas)
@@ -62,17 +65,21 @@ public class AutowiringBuilder
                 foreach (var attr in registerAttributes)
                 {
                     var serviceType = attr.ServiceType ?? type;
-                    var registrationMethod = GetRegistrationMethod(_services, attr.Lifetime);
+
+                    bool isTryAddEnumerable = attr.Lifetime == Lifetime.TryAddEnumerableTransient ||
+                                              attr.Lifetime == Lifetime.TryAddEnumerableScoped ||
+                                              attr.Lifetime == Lifetime.TryAddEnumerableSingleton;
 
                     if (serviceType.IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
                     {
                         if (serviceType.IsGenericType)
                         {
-                            _services.Add(ServiceDescriptor.Describe(
+                            var serviceDescriptor = CreateServiceDescriptor(
                                 serviceType.GetGenericTypeDefinition(),
                                 type.GetGenericTypeDefinition(),
-                                attr.Lifetime.ConvertToServiceLifetime())
-                            );
+                                attr.Lifetime);
+
+                            RegisterServiceDescriptor(serviceDescriptor, isTryAddEnumerable);
                         }
                         else
                         {
@@ -82,14 +89,21 @@ public class AutowiringBuilder
                                 if (iface.IsGenericType && iface.GetGenericTypeDefinition().IsDefined(typeof(RegisterGenericInterfaceAttribute), false))
                                 {
                                     var genericInterface = iface.GetGenericTypeDefinition();
-                                    _services.Add(ServiceDescriptor.Describe(genericInterface, type, attr.Lifetime.ConvertToServiceLifetime()));
+
+                                    var serviceDescriptor = CreateServiceDescriptor(
+                                        genericInterface,
+                                        type,
+                                        attr.Lifetime);
+
+                                    RegisterServiceDescriptor(serviceDescriptor, isTryAddEnumerable);
                                 }
                             }
                         }
                     }
                     else if (type.GetInterfaces().Contains(serviceType) || type == serviceType)
                     {
-                        RegisterService(serviceType, type, registrationMethod);
+                        var serviceDescriptor = CreateServiceDescriptor(serviceType, type, attr.Lifetime);
+                        RegisterServiceDescriptor(serviceDescriptor, isTryAddEnumerable);
                     }
                     else
                     {
@@ -217,6 +231,56 @@ public class AutowiringBuilder
 
         return this;
     }
+    private static ServiceDescriptor CreateServiceDescriptor(Type serviceType, Type implementationType, Lifetime lifetime)
+    {
+        ServiceLifetime serviceLifetime = lifetime switch
+        {
+            Lifetime.Transient => ServiceLifetime.Transient,
+            Lifetime.Scoped => ServiceLifetime.Scoped,
+            Lifetime.Singleton => ServiceLifetime.Singleton,
+            Lifetime.TryAddTransient => ServiceLifetime.Transient,
+            Lifetime.TryAddScoped => ServiceLifetime.Scoped,
+            Lifetime.TryAddSingleton => ServiceLifetime.Singleton,
+            Lifetime.TryAddEnumerableTransient => ServiceLifetime.Transient,
+            Lifetime.TryAddEnumerableScoped => ServiceLifetime.Scoped,
+            Lifetime.TryAddEnumerableSingleton => ServiceLifetime.Singleton,
+            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), "Unsupported lifetime.")
+        };
+
+        return ServiceDescriptor.Describe(serviceType, implementationType, serviceLifetime);
+    }
+
+
+    private void RegisterServiceDescriptor(ServiceDescriptor descriptor, bool isTryAddEnumerable)
+    {
+        if (isTryAddEnumerable)
+        {
+            _services.TryAddEnumerable(descriptor);
+        }
+        else
+        {
+            // Handle TryAdd and regular registrations
+            if (descriptor.Lifetime == ServiceLifetime.Scoped)
+            {
+                if (!_services.Any(sd => sd.ServiceType == descriptor.ServiceType && sd.Lifetime == ServiceLifetime.Scoped))
+                {
+                    _services.Add(descriptor);
+                }
+            }
+            else if (descriptor.Lifetime == ServiceLifetime.Singleton)
+            {
+                if (!_services.Any(sd => sd.ServiceType == descriptor.ServiceType && sd.Lifetime == ServiceLifetime.Singleton))
+                {
+                    _services.Add(descriptor);
+                }
+            }
+            else if (descriptor.Lifetime == ServiceLifetime.Transient)
+            {
+                _services.Add(descriptor);
+            }
+        }
+    }
+
 
     private ServiceDescriptor CreateDecoratorDescriptor(Type serviceType, Type decoratorType, ServiceDescriptor previousDescriptor)
     {
@@ -275,6 +339,7 @@ public class AutowiringBuilder
         AddDecorators();
         return _services;
     }
+
     private static Action<Type, object, Type> GetKeyedRegistrationMethod(IServiceCollection services, BaseKeyedServiceAttribute attr)
     => attr switch
     {
@@ -283,22 +348,4 @@ public class AutowiringBuilder
         AddKeyedTransientAttribute _ => (s, k, t) => services.AddKeyedTransient(s, k, t),
         _ => throw new ArgumentOutOfRangeException(nameof(attr), "Unsupported attribute type.")
     };
-
-
-    private static Action<Type, Type> GetRegistrationMethod(IServiceCollection services, Lifetime.Lifetime lifetime)
-        => lifetime switch
-        {
-            Lifetime.Lifetime.Scoped => (s, t) => services.AddScoped(s, t),
-            Lifetime.Lifetime.Singleton => (s, t) => services.AddSingleton(s, t),
-            Lifetime.Lifetime.Transient => (s, t) => services.AddTransient(s, t),
-            Lifetime.Lifetime.TryAddScoped => (s, t) => services.TryAddScoped(s, t),
-            Lifetime.Lifetime.TryAddSingleton => (s, t) => services.TryAddSingleton(s, t),
-            Lifetime.Lifetime.TryAddTransient => (s, t) => services.TryAddTransient(s, t),
-            _ => throw new ArgumentOutOfRangeException(nameof(lifetime), "Unsupported lifetime.")
-        };
-
-    private static void RegisterService(Type serviceType, Type implementationType, Action<Type, Type> registrationMethod)
-    {
-        registrationMethod(serviceType, implementationType);
-    }
 }

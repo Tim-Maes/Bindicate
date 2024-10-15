@@ -1,4 +1,4 @@
-﻿namespace Bindicate.Lifetime;
+﻿namespace Bindicate;
 
 public enum Lifetime
 {
@@ -7,5 +7,8 @@ public enum Lifetime
     Transient,
     TryAddTransient,
     Singleton,
-    TryAddSingleton
+    TryAddSingleton,
+    TryAddEnumerableTransient,
+    TryAddEnumerableScoped,
+    TryAddEnumerableSingleton
 }

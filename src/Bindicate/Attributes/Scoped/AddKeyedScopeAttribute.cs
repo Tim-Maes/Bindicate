@@ -10,6 +10,6 @@ public class AddKeyedScopedAttribute : BaseKeyedServiceAttribute
     {
     }
 
-    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.Scoped;
+    public override Lifetime Lifetime => Lifetime.Scoped;
 
 }

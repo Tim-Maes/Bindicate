@@ -7,11 +7,11 @@
 
 ## Features 🌟
 
-- Automatic registration of services using custom attributes.
+- Automatic registration of (keyed) services using custom attributes.
 - Automatic registration and configuration of options via `IOptions<T>`.
 - Provides clear visibility and reduces boilerplate code.
 - Simple integration with the built-in .NET IoC container.
-- Supports Keyed Services
+- Supports Decorators
 
 ### Supported types
 <center>
@@ -24,7 +24,7 @@
 |TryAddScoped        |✔️        |❌                            |❌ |❌ |❌ |
 |AddSingleton        |✔️        |✔️                            | ✔️| ❌| ❌|
 |TryAddSingleton     |✔️        |❌                            |❌ |❌ |❌ |
-|TryAddEnumerable    |❌        |❌                           | ❌| ❌|❌ |
+|TryAddEnumerable    |✔️         |❌                           | ❌| ❌|❌ |
 </center>
 
 ## Installation 📦

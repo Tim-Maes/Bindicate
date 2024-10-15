@@ -1,6 +1,4 @@
-﻿using Bindicate.Lifetime;
-
-namespace Bindicate.Attributes;
+﻿namespace Bindicate.Attributes;
 
 /// <summary>
 /// Attempts to register a service with the dependency injection container with a singleton lifetime.
@@ -8,7 +6,7 @@ namespace Bindicate.Attributes;
 /// </summary>
 public class TryAddSingletonAttribute : BaseServiceAttribute
 {
-    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.TryAddSingleton;
+    public override Lifetime Lifetime => Bindicate.Lifetime.TryAddSingleton;
 
     public TryAddSingletonAttribute() : base() { }
 
