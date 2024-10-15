@@ -45,7 +45,7 @@ You can check out the [documentation](https://github.com/Tim-Maes/Bindicate/wiki
 ### Quick overview
 
 Add this line in a project to register all decorated services.
-To also configure options, use `.WithOptions()`.
+To also [configure options](https://github.com/Tim-Maes/Bindicate/wiki/03.-Registering-Options), use `.WithOptions()`.
 You can also use the `ServiceCollectionExtension` pattern and use `IConfiguration` as a parameters for your extension method if they have options to register.
 
 **Example in host project**
