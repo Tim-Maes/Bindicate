@@ -69,6 +69,23 @@ builder.Services
     .Register();
 ```
 
+**Example usage**
+```csharp
+[AddScoped(typeof(IMyTaskRunner))]
+public class TaskRunner : IMyTaskRunner
+{
+    public void Run()
+    {
+        // ...
+    }
+}
+
+public interface IMyTaskRunner
+{
+    void Run();
+}
+```
+
 ## License
 
 This project is licensed under the MIT license.
