@@ -6,7 +6,7 @@ public abstract class BaseKeyedServiceAttribute : Attribute
     public Type ServiceType { get; protected set; }
     public object Key { get; protected set; }  // Added key property
 
-    public abstract Lifetime.Lifetime Lifetime { get; }
+    public abstract Lifetime Lifetime { get; }
 
     // Constructor for class-only registration without a key
     protected BaseKeyedServiceAttribute()

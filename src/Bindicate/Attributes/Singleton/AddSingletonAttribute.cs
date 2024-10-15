@@ -1,6 +1,4 @@
-﻿using Bindicate.Lifetime;
-
-namespace Bindicate.Attributes;
+﻿namespace Bindicate.Attributes;
 
 /// <summary>
 /// Specifies that a service should be registered with the dependency injection container with a singleton lifetime.
@@ -8,7 +6,7 @@ namespace Bindicate.Attributes;
 /// </summary>
 public class AddSingletonAttribute : BaseServiceAttribute
 {
-    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.Singleton;
+    public override Lifetime Lifetime => Lifetime.Singleton;
 
     public AddSingletonAttribute() : base() { }
 

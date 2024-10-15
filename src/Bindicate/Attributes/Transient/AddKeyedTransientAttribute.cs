@@ -10,5 +10,5 @@ public class AddKeyedTransientAttribute : BaseKeyedServiceAttribute
     {
     }
 
-    public override Lifetime.Lifetime Lifetime => Bindicate.Lifetime.Lifetime.Transient;
+    public override Lifetime Lifetime => Lifetime.Transient;
 }
