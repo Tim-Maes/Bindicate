@@ -136,9 +136,6 @@ public class AutowiringBuilder
                 {
                     var configSection = configuration.GetSection(attr.ConfigurationSection);
 
-                    if (!configSection.Exists())
-                        throw new InvalidOperationException($"Missing configuration section: {attr.ConfigurationSection}");
-
                     var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
                             .GetMethods()
                             .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
