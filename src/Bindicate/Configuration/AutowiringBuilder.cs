@@ -136,12 +136,15 @@ public class AutowiringBuilder
                 {
                     var configSection = configuration.GetSection(attr.ConfigurationSection);
 
-                    var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
-                            .GetMethods()
-                            .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
+                    if (configSection.Exists())
+                    {
+                        var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
+                                .GetMethods()
+                                .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
 
-                    var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
-                    specializedMethod.Invoke(null, new object[] { _services, configSection });
+                        var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
+                        specializedMethod.Invoke(null, new object[] { _services, configSection });
+                    }
                 }
             }
         }
