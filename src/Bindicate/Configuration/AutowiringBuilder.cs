@@ -136,15 +136,15 @@ public class AutowiringBuilder
                 {
                     var configSection = configuration.GetSection(attr.ConfigurationSection);
 
-                    if (!configSection.Exists())
-                        throw new InvalidOperationException($"Missing configuration section: {attr.ConfigurationSection}");
+                    if (configSection.Exists())
+                    {
+                        var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
+                                .GetMethods()
+                                .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
 
-                    var genericOptionsConfigureMethod = typeof(OptionsConfigurationServiceCollectionExtensions)
-                            .GetMethods()
-                            .FirstOrDefault(m => m.Name == "Configure" && m.GetParameters().Length == 2);
-
-                    var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
-                    specializedMethod.Invoke(null, new object[] { _services, configSection });
+                        var specializedMethod = genericOptionsConfigureMethod.MakeGenericMethod(type);
+                        specializedMethod.Invoke(null, new object[] { _services, configSection });
+                    }
                 }
             }
         }
